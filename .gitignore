@@ -1,1 +1,7 @@
+# Temporary and local files
+__pycache__/
+.vscode 
+
+# Local files used for testing, not necessary for now.
 ICE-Talk/
+models.py
