@@ -2,6 +2,7 @@ import os
 
 from src.analysis import run_model
 from src.whatsapp import convert_chat
+from src.utils import json2csv
 
 input_file = os.path.join('data', 'whatsapp_famille.txt')
 jsonfile_100 = os.path.join('data', 'whatsapp_100.json')
@@ -23,3 +24,16 @@ run_model(jsonfile_irc1, 0)
 run_model(jsonfile_irc1, 1)
 run_model(jsonfile_irc2, 0)
 run_model(jsonfile_irc2, 1)
+
+
+json2csv('data/chaat_accueil.json',
+         'data/chaat_accueil.csv',
+         ['default', 'camembert'])
+
+json2csv('data/irc_chat.json',
+         'data/irc_chat.csv',
+         ['default', 'camembert'])
+
+json2csv('data/whatsapp_5000.json',
+         'data/whatsapp_5000.csv',
+         ['default', 'camembert'])

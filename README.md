@@ -60,13 +60,13 @@ python analyze_file.py 'data/whatsapp_500.json'
 * [ ] IRC conversation
   * [x] Store IRC messages into JSON file
   * [x] Clean message information (remove useless [] or '')
-  * [ ] Analyze conversation with sentiment-analysis (camembert)
+  * [x] Analyze conversation with sentiment-analysis (camembert)
   * [x] Anonymize messages
 * [ ] Sentiment analysis
   * [ ] Create a GUI showing colors based on sentiment
   * [ ] Convert sentiment to color
-  * [ ] Set NEUTRAL threshold as a parameter
+  * [x] Set NEUTRAL threshold as a parameter
   * [x] Update JSON / CSV when analyzing instead of creating a new one
-* [ ] CSV 
-  * [ ] Color format rows depending on the analyzed sentiment
-  * [ ] Create CSV to JSON and JSON to CSV routine
+* [x] CSV 
+  * [x] Color format rows depending on the analyzed sentiment
+  * [x] Create CSV to JSON and JSON to CSV routine
