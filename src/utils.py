@@ -68,16 +68,3 @@ def json2csv(jsonfile: str,
         with open(csvfile, 'a', encoding="utf-8", newline='') as f:
             csvwriter = csv.writer(f, delimiter=',')
             csvwriter.writerow(data)
-
-
-json2csv('data/chaat_accueil.json',
-         'data/chaat_accueil.csv',
-         ['default', 'camembert'])
-
-json2csv('data/irc_chat.json',
-         'data/irc_chat.csv',
-         ['default', 'camembert'])
-
-json2csv('data/whatsapp_5000.json',
-         'data/whatsapp_5000.csv',
-         ['default', 'camembert'])
