@@ -8,6 +8,49 @@ This project contains several codes used for :
    * sentiment analysis using default configuration of transformers libray
    * sentiment analysis using camembert (transformers library)
 
+## How To
+
+**WhatsApp Chat conversion**
+
+The file used is *whatsapp.py*.
+
+This command will convert the txt WhatsApp chat history file to JSON, extracting the 5000 first messages:
+``` 
+python whatsapp.py 'data/whatsapp_famille.txt' 'data/whatsapp_5000.json' -l 5000
+```
+
+We can also extract all messages as follow:
+``` 
+python whatsapp.py 'data/whatsapp_famille.txt' 'data/whatsapp.json'
+```
+
+**IRC message gathering**
+
+The file used is *irc_connection.py*.
+
+We can use the default configuration for extraction:
+``` 
+python irc_connection.py
+```
+
+Or we can define our own server, port, channel, name and files:
+``` 
+python irc_connection.py -s 'irc.chaat.fr' -p 6667 -c '#accueil' 'ronde' 'chat.csv' 'chat.json'
+```
+
+**Run transformers' sentiment analysis**
+
+The file used is *test_transformers.py*.
+
+We can use the default sentiment analysis in transformers:
+``` 
+python test_transformers.py 'data/whatsapp_500.json' 'results/default_5000.json' -v 1
+```
+
+Or use the default behavior, which is based on CamemBERT model (for French language):
+``` 
+python test_transformers.py 'data/whatsapp_500.json' 'results/camembert_5000.json'
+```
 
 ## TODO
 

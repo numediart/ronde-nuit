@@ -1,3 +1,5 @@
+'''Connect to an IRC server to gather messages from one of its channel.
+'''
 import argparse
 
 from chat.irc_bot import IrcBot
@@ -10,7 +12,9 @@ def main():
         server : 'irc.chaat.fr'
         port : 6667
         channel : '#accueil'
-        name : pmg_umons
+        name : ronde
+        csvfile : chat.csv
+        jsonfile : chat.json
     '''
     parser = argparse.ArgumentParser(
         description='Gather data (messages) from an IRC channel on a server.')
