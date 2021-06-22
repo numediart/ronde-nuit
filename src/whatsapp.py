@@ -95,28 +95,22 @@ def parse_line(line: str) -> Dict[str, str]:
     return data
 
 
-def main():
-    '''Main function used to parse command line arguments.
+def convert_chat(srcfile: str,
+                 outfile: str,
+                 length: int = 0) -> None:
+    '''Converts txt archive file to JSON file.
+
+    Args
+    ----
+    srcfile : str
+        path to WhatsApp chat history file
+    outfile : str
+        JSON file to extract messages to
+    length : optional, int
+        number of messages to extract. If 0, extract all messages.
+        Default is 0
     '''
-    parser = argparse.ArgumentParser(
-        description='Parse WhatsApp chat and extract message into a JSON file.')
-    parser.add_argument('path', type=str,
-                        help='path to WhatsApp chat history file.')
-    parser.add_argument('outfile', type=str,
-                        help='JSON output file containing extracted messages.')
-    parser.add_argument('-l', '--length', type=int, default=0,
-                        help='number of messages to extract. 0 means all messages.')
-    args = parser.parse_args()
+    data = read_chat(srcfile, length)
 
-    data = read_chat(args.path, args.length)
-
-    with open(args.outfile, 'w') as f:
+    with open(outfile, 'w') as f:
         json.dump(data, f, indent=4)
-
-
-if __name__ == '__main__':
-    length = 5000
-    path = os.path.join('data', 'whatsapp_famille.txt')
-    outfile = os.path.join('data', 'chat_5000.json')
-
-    main()
