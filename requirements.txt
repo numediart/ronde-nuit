@@ -4,3 +4,6 @@ tqdm
 transformers
 sentencepiece
 irc
+tk
+pillow
+opencv-python
