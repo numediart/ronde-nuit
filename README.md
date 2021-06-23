@@ -51,20 +51,26 @@ Or use the default behavior, which is based on CamemBERT model (for French langu
 ``` 
 python analyze_file.py 'data/whatsapp_500.json'
 ```
+**Run GUI**
 
+Simply use *ronde.py*.
+
+```
+python ronde.py
+```
 ## TODO
 
 * [ ] General conversation
   * [ ] Remove short sentences (less than 3 words, might be a parameter)
   * [ ] Handle encoding issues with latin words and emojis 
-* [ ] IRC conversation
+* [x] IRC conversation
   * [x] Store IRC messages into JSON file
   * [x] Clean message information (remove useless [] or '')
   * [x] Analyze conversation with sentiment-analysis (camembert)
   * [x] Anonymize messages
-* [ ] Sentiment analysis
-  * [ ] Create a GUI showing colors based on sentiment
-  * [ ] Convert sentiment to color
+* [x] Sentiment analysis
+  * [x] Create a GUI showing colors based on sentiment
+  * [x] Convert sentiment to color
   * [x] Set NEUTRAL threshold as a parameter
   * [x] Update JSON / CSV when analyzing instead of creating a new one
 * [x] CSV 
