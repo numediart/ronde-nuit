@@ -60,9 +60,10 @@ python ronde.py
 ```
 ## TODO
 
-* [ ] General conversation
-  * [ ] Remove short sentences (less than 3 words, might be a parameter)
-  * [ ] Handle encoding issues with latin words and emojis 
+* [x] General conversation
+  * [x] Remove short sentences (less than 3 words, might be a parameter)
+  * [x] Handle encoding issues with latin words and emojis
+  * [x] Remove IRC formatting
 * [x] IRC conversation
   * [x] Store IRC messages into JSON file
   * [x] Clean message information (remove useless [] or '')
@@ -76,3 +77,7 @@ python ronde.py
 * [x] CSV 
   * [x] Color format rows depending on the analyzed sentiment
   * [x] Create CSV to JSON and JSON to CSV routine
+
+## Some references
+
+[Spacy](https://spacy.io/)

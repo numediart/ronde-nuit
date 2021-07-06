@@ -66,5 +66,6 @@ def json2csv(jsonfile: str,
             data.append(elem[name]['label'])
             data.append(elem[name]['score'])
         with open(csvfile, 'a', encoding="utf-8", newline='') as f:
+
             csvwriter = csv.writer(f, delimiter=',')
             csvwriter.writerow(data)
