@@ -33,10 +33,12 @@ We can use the default configuration for extraction:
 python irc_connection.py
 ```
 
-Or we can define our own server, port, channel, name and files:
+Or we can define our own server, port, channels, name and JSON file:
 ``` 
-python irc_connection.py -s 'irc.chaat.fr' -p 6667 -c '#accueil' 'ronde' 'chaat_accueil.csv' 'chaat_accueil.json'
+python irc_connection.py -s 'irc.chaat.fr' -p 6667 -c '#accueil' '#maroc' -n 'ronde' -f 'chaat.json'
 ```
+
+Multiple channels can be given at once. Output JSON file will have a 'channel' value with the channel tag.
 
 **Run transformers' sentiment analysis**
 

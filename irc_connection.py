@@ -22,18 +22,16 @@ def main():
                         help='IRC server to connect to.')
     parser.add_argument('-p', '--port', type=int, default=6667,
                         help='port to log on.')
-    parser.add_argument('-c', '--channel', type=str, default='#accueil',
+    parser.add_argument('-c', '--channels', type=str, default=['#accueil'], nargs='+',
                         help='channel on the server to log in.')
     parser.add_argument('-n', '--name', type=str, default='pmg_umons',
                         help='name of the bot on the server.')
-    parser.add_argument('-f', '--file', type=str, default='chat.csv',
-                        help='path to CSV file to store messages in.')
-    parser.add_argument('-j', '--json', type=str, default='chat.json',
+    parser.add_argument('-f', '--file', type=str, default='output.json',
                         help='path to JSON file to store messages in.')
     args = parser.parse_args()
 
-    bot = IrcBot(args.server, args.channel, args.name,
-                 args.port, args.file, args.json)
+    bot = IrcBot(args.server, args.channels, args.name,
+                 args.port, args.file)
     bot.start()
 
 

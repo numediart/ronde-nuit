@@ -5,4 +5,5 @@ __pycache__/
 # Local files used for testing, not necessary for now.
 ICE-Talk/
 models.py
+merge.py
 *.zip

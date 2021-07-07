@@ -3,11 +3,10 @@
 Based on :
     https://github.com/jaraco/irc/blob/main/scripts/testbot.py
 """
-import csv
 import json
 import os
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 
 import irc.bot
 import irc.strings
@@ -16,53 +15,33 @@ import irc.strings
 class IrcBot(irc.bot.SingleServerIRCBot):
     def __init__(self,
                  server: str,
-                 channel: str,
+                 channels: List[str],
                  nickname: str,
                  port: int = 6667,
-                 csvfile: Optional[str] = None,
-                 jsonfile: Optional[str] = None):
+                 jsonfile: str = 'output.json'):
         '''Initialize the bot using irc package.
         '''
         irc.bot.SingleServerIRCBot.__init__(
             self, [(server, port)], nickname, nickname)
-        self.channel = channel
+        self.names = channels
+        self.server = server
+        self.port = port
+        self.jsonfile = jsonfile
 
-        self.jsonfile = 'chat.json' if jsonfile is None else jsonfile
-        self.csvfile = 'chat.csv' if csvfile is None else csvfile
-        self.create_csv()
+        self.index = {key: 0 for key in self.names}
 
-        self.index = 0
-
-    def create_csv(self) -> None:
-        '''Creates the CSV file. Adds a header if file is new.
-        '''
-        header = None
-        if not os.path.exists(self.csvfile):
-            header = ['message']
-
-        with open(self.csvfile, 'a', newline='') as csvf:
-            csvwriter = csv.writer(csvf, delimiter=',')
-            if header:
-                csvwriter.writerow(header)
+        irc.client.ServerConnection.buffer_class.encoding = "latin-1"
 
     def on_welcome(self, c, e):
         '''What to do when logging in the server.
         '''
-        c.join(self.channel)
+        for channel in self.names:
+            c.join(channel)
+            print('Logged into {}@{}:{}'.format(channel, self.server, self.port))
 
-    def update_csv(self, msg: str) -> None:
-        '''Add a message to the csv file.
-
-        Args
-        ----
-        msg : str
-            message to add
-        '''
-        with open(self.csvfile, 'a', encoding="utf-8", newline='') as csvf:
-            csvwriter = csv.writer(csvf, delimiter=',')
-            csvwriter.writerow([msg])
-
-    def update_json(self, msg: str) -> None:
+    def update_json(self,
+                    channel: str,
+                    msg: str) -> None:
         '''Add a message to the json file.
 
         Args
@@ -70,7 +49,9 @@ class IrcBot(irc.bot.SingleServerIRCBot):
         msg : str
             message to add
         '''
-        data = {'message': msg}
+        data = {
+            'message': msg,
+            'channel': channel}
 
         if os.path.exists(self.jsonfile):
             with open(self.jsonfile, 'r') as jsonf:
@@ -79,7 +60,7 @@ class IrcBot(irc.bot.SingleServerIRCBot):
         else:
             jsondata = [data]
 
-        with open(self.jsonfile, 'w', newline='') as jsonf:
+        with open(self.jsonfile, 'w') as jsonf:
             json.dump(jsondata, jsonf)
 
     def on_pubmsg(self, c, e):
@@ -92,12 +73,10 @@ class IrcBot(irc.bot.SingleServerIRCBot):
             arguments: ['<msg>']
             tags: []
         '''
-        # CSV file
-        self.update_csv(e.arguments[0])
-
-        # JSON file
-        self.update_json(e.arguments[0])
+        # JSON file update
+        channel = e.target.lower()
+        self.update_json(channel, e.arguments[0])
 
         # Update terminal text
-        self.index += 1
-        print('Messages read : {}'.format(self.index), end='\r')
+        self.index[channel] += 1
+        print('Messages read in {}: {}'.format(channel, self.index[channel]))
