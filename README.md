@@ -35,7 +35,7 @@ python irc_connection.py
 
 Or we can define our own server, port, channels, name and JSON file:
 ``` 
-python irc_connection.py -s 'irc.chaat.fr' -p 6667 -c '#accueil' '#maroc' -n 'ronde' -f 'chaat.json'
+python irc_connection.py -s 'irc.chaat.fr' -p 6667 -c '#accueil' '#maroc' -n 'ronde' -f 'output.json'
 ```
 
 Multiple channels can be given at once. Output JSON file will have a 'channel' value with the channel tag.
@@ -53,6 +53,23 @@ Or use the default behavior, which is based on CamemBERT model (for French langu
 ``` 
 python analyze_file.py 'data/whatsapp_500.json'
 ```
+
+**Convert JSON to CSV files**
+
+The file used is *convert2csv.py*.
+
+Message extraction creates a JSON file. We use this function to convert JSON output to CSV file.
+
+We can use the script with default parameters:
+``` 
+python convert2csv.py 'data/whatsapp_500.json'
+```
+
+It is assumed that sentiment analysis is computed on the JSON file. Hence we can define which result we want to show in the CSV file:
+``` 
+python convert2csv.py 'data/whatsapp_500.json' -c 'data/whatsapp_500.csv' -m 'default' 'camembert'
+```
+
 **Run GUI**
 
 Simply use *ronde.py*.

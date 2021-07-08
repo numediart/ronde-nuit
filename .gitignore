@@ -6,4 +6,5 @@ __pycache__/
 ICE-Talk/
 models.py
 merge.py
+debug.ipynb
 *.zip
