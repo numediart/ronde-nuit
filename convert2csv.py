@@ -2,7 +2,7 @@
 '''
 import argparse
 
-from src.utils import json2csv
+from src.format import json2csv
 
 
 def main():
@@ -14,12 +14,9 @@ def main():
                         help='path to JSON file.')
     parser.add_argument('-c', '--csv', type=str, default='output.csv',
                         help='CSV output file to have conversion.')
-    parser.add_argument('-m', '--models', type=str,
-                        default=['default', 'camembert'], nargs='+',
-                        help='list of models result present in the JSON file.')
     args = parser.parse_args()
 
-    json2csv(args.path, args.csv, args.models)
+    json2csv(args.path, args.csv)
 
 
 if __name__ == '__main__':

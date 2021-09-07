@@ -3,7 +3,7 @@
 import argparse
 import json
 
-from src.whatsapp import convert_chat
+from src.format import convert_whatsapp_chat
 
 
 def main():
@@ -19,7 +19,7 @@ def main():
                         help='number of messages to extract. 0 means all messages.')
     args = parser.parse_args()
 
-    convert_chat(args.path, args.outfile, args.length)
+    convert_whatsapp_chat(args.path, args.outfile, args.length)
 
 
 if __name__ == '__main__':

@@ -1,0 +1,16 @@
+---
+  colors:
+    negative: 
+      bg: "#000000"  # black
+      fg: "#fff"     # white
+    positive: 
+      bg: "#fff"     # white
+      fg: "#000000"  # black
+    neutral: 
+      bg: "#9b9f9b"  # grey
+      fg: "#000000"  # black
+  time:
+    text: 1000
+    transition: 1000
+  models:
+    version: 0

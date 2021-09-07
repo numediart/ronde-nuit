@@ -2,7 +2,7 @@
 '''
 import argparse
 
-from src.analysis import run_model
+from src.analysis import analyze_file
 
 
 def main():
@@ -18,7 +18,7 @@ def main():
                         help='threshold for neutral label. Any score below the threshold (positive or negative) is considered neutral.')
     args = parser.parse_args()
 
-    run_model(args.srcfile, args.version, args.threshold)
+    analyze_file(args.srcfile, args.version, args.threshold)
 
 
 if __name__ == '__main__':

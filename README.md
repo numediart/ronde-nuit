@@ -77,26 +77,41 @@ Simply use *ronde.py*.
 ```
 python ronde.py
 ```
+
+## Colaboratory
+https://colab.research.google.com/drive/1PliF1rM7jO9RXFqBj4IOGi-PnVEqnzyV?usp=sharing
+
 ## TODO
 
-* [x] General conversation
-  * [x] Remove short sentences (less than 3 words, might be a parameter)
-  * [x] Handle encoding issues with latin words and emojis
-  * [x] Remove IRC formatting
-* [x] IRC conversation
-  * [x] Store IRC messages into JSON file
-  * [x] Clean message information (remove useless [] or '')
-  * [x] Analyze conversation with sentiment-analysis (camembert)
-  * [x] Anonymize messages
-* [x] Sentiment analysis
-  * [x] Create a GUI showing colors based on sentiment
-  * [x] Convert sentiment to color
-  * [x] Set NEUTRAL threshold as a parameter
-  * [x] Update JSON / CSV when analyzing instead of creating a new one
-* [x] CSV 
-  * [x] Color format rows depending on the analyzed sentiment
-  * [x] Create CSV to JSON and JSON to CSV routine
-
+* [ ] Visualisation
+  * [ ] Add time between display in configuration
+  * [ ] Change window display (make it as an option ?)
+* [x] Colors
+  * [x] Make ranging between two hexadecimal values
+  * [x] Make it as a class ?
+* [ ] Communication
+  * [ ] Receive data from SQL server
+* [ ] Model
+  * [ ] Create code structure for retraining
+  * [ ] Retrain with new annotation
+  * [ ] Add to Colaboratory
+* [x] Misc
+  * [x] Cleanup colab
+  * [x] Add explanations to colab
+  * [ ] Download new data from Sylvain
+  * [x] Apply sentiment analysis to Sylvain's data
 ## Some references
 
 [Spacy](https://spacy.io/)
+[ImageColorPicker](https://imagecolorpicker.com/)
+
+### For development
+
+[HuggingFace Dataset](https://huggingface.co/docs/datasets/add_dataset.html)
+[TorchVision Dataset](https://pytorch.org/vision/stable/datasets.html)
+[Torch Dataset](https://pytorch.org/tutorials/beginner/data_loading_tutorial.html)
+[HuggingFace Fine-tuning](https://huggingface.co/transformers/training.html)
+
+Example of dataset (Allocine): 
+[Allocine Dataset Structure](https://github.com/TheophileBlard/french-sentiment-analysis-with-bert/blob/master/allocine_dataset/create_dataset.ipynb)
+[Allocine Dataset Code](https://github.com/huggingface/datasets/blob/master/datasets/allocine/allocine.py)
