@@ -65,7 +65,6 @@ class SentimentAnalyzer():
             0 means using CamemBERT model, 1 is the default pipeline for sentiment-analysis.
             Defaults is 0.
         '''
-
         result = self.nlp(msg)[0]
 
         score = result['score']

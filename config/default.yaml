@@ -1,16 +1,9 @@
 ---
   colors:
-    positive: 
-      bg: "#45be25" # green
-      fg: "#fff"    # white
-    negative: 
-      bg: "#c42510" # red
-      fg: "#fff"    # white
-    neutral:
-      bg: "#edd626" # yellow
-      fg: "#fff"    # white
+    bg: ['#ff5722', '#e64e1f', '#cc461b', '#b33d18', '#993414', '#802c11', '#66230e', '#4d1a0a', '#331107', '#190903']
+    fg: '#fff'
   time:
     text: 1000
-    transition: 1000
+    transition: 10
   models:
     version: 0

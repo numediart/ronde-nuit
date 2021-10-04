@@ -6,18 +6,72 @@ from colour import Color
 from .format import remove_irc_formatting
 
 
+class ColorManager():
+    def __init__(self,
+                 colors: Dict):
+        """Set the color dictionnary to new values.
+
+        Args
+        ----
+        colors : dict
+            the dictionnary of colors which should be structured as:
+              - fg, list of foreground colors or str of unique color
+              - bg, list of background colors or str of unique color
+        """
+        if isinstance(colors['fg'], str):
+            colors['fg'] = [colors['fg']]
+
+        if isinstance(colors['bg'], str):
+            colors['bg'] = [colors['bg']]
+
+        self.colors = colors.copy()
+
+        self.index = {}
+        self.index['fg'] = len(self.colors['fg'])//2
+        self.index['bg'] = len(self.colors['bg'])//2
+
+    def get_current(self, ctype):
+        return self.colors[ctype][self.index[ctype]]
+
+    def get_next(self, label, ctype):
+        if label == 'positive' and self.index[ctype] < len(self.colors[ctype]) - 1:
+            self.index[ctype] += 1
+        if label == 'negative' and self.index[ctype] > 0:
+            self.index[ctype] -= 1
+        if label == 'neutral':
+            if self.index[ctype] > len(self.colors[ctype])//2:
+                self.index[ctype] -= 1
+            elif self.index[ctype] < len(self.colors[ctype])//2:
+                self.index[ctype] += 1
+
+        return self.colors[ctype][self.index[ctype]]
+
+    def colorRange(self, colorStart, colorEnd, step=100):
+        """
+        """
+        objColorStart = Color(colorStart)
+        objColorEnd = Color(colorEnd)
+
+        for elem in list(objColorStart.range_to(objColorEnd, step)):
+            yield elem
+
+
 class MsgManager():
     '''Colors on Tkinter should be #xxyyzz where xxyyzz is an hexadecimal number.
     '''
 
     def __init__(self,
                  analyzer,
-                 colors: Dict):
-        self.colors = colors.copy()
+                 colors: Dict,
+                 steps=100,
+                 transition=10):
         self.analyzer = analyzer
         self.stack: List[Any] = []
 
+        self.colors = ColorManager(colors)
         self.previous = None
+        self.steps = steps
+        self.transition = transition
 
     def set_data(self, data):
         self.data = data
@@ -35,33 +89,20 @@ class MsgManager():
             return self.previous
         return []
 
-    def update_stack(self, step=100):
+    def update_stack(self):
         elem = self.data.pop(0)
         msg = remove_irc_formatting(elem['message'])
         msg = ftfy.ftfy(msg)
 
         _, label = self.analyzer.analyze(msg)
-        fg = self.colors[label]["fg"]
-        bg = self.colors[label]["bg"]
 
-        if self.previous:
-            pmsg, pfg, pbg, _ = self.previous
-            for ifg, ibg in zip(self.colorRange(pfg, fg, step),
-                                self.colorRange(pbg, bg, step)):
-                self.stack.append((pmsg, ifg, ibg, 10))
+        fg = self.colors.get_next(label, 'fg')
+        bg = self.colors.get_next(label, "bg")
 
-        self.stack.append((msg, fg, bg, 10))
+        if self.previous and self.steps > 0:
+            pmsg, pfg, pbg, _, plab = self.previous
+            for ifg, ibg in zip(self.colors.colorRange(pfg, fg, self.steps),
+                                self.colors.colorRange(pbg, bg, self.steps)):
+                self.stack.append((pmsg, ifg, ibg, self.transition, plab))
 
-    def set_colors(self, colors):
-        """
-        """
-        self.colors = colors.copy()
-
-    def colorRange(self, colorStart, colorEnd, step=100):
-        """
-        """
-        objColorStart = Color(colorStart)
-        objColorEnd = Color(colorEnd)
-
-        for elem in list(objColorStart.range_to(objColorEnd, step)):
-            yield elem
+        self.stack.append((msg, fg, bg, self.transition, label))

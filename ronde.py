@@ -2,18 +2,19 @@
 '''
 import argparse
 import json
+import time
 import tkinter as tk
 from tkinter import Misc, filedialog, ttk
 from typing import Any, Dict, List
 
-import ftfy
 import yaml
 
 from src.analysis import SentimentAnalyzer
 from src.manager import MsgManager
+from transformers import logging
 
 
-class Ronde:
+class RondeColor:
     def __init__(self,
                  parent: Misc,
                  config: Dict[str, Any]):
@@ -29,7 +30,7 @@ class Ronde:
 
         # colors to show
         self.manager = MsgManager(SentimentAnalyzer(
-            config['models']['version']), config['colors'])
+            config['models']['version']), config['colors'], transition=config['time']['transition'])
 
         self.create_window()
 
@@ -56,10 +57,10 @@ class Ronde:
         '''Update the text with the next message and the background with color corresponding to message sentiment.
         '''
         if self.manager.has_data():
-            msg, fg, bg, time = self.manager.next_data()
+            msg, fg, bg, time, _ = self.manager.next_data()
 
             # Update color
-            self.label.configure(text=msg)
+            self.label.configure(text='')
             self.update_color(fg, bg)
             self.root.after(time, self.update)
 
@@ -79,7 +80,69 @@ class Ronde:
         with open(filename) as f:
             self.manager.set_data(json.load(f))
 
+        self.button.pack_forget()
         self.root.after(100, self.update)
+
+
+class RondeText():
+
+    def __init__(self,
+                 config: Dict[str, Any],
+                 filename: str):
+        # Time to wait between actions
+        self.times = config['time']
+
+        # Data extracted from a JSON file
+        self.data: List[Any] = []
+
+        # colors to show
+        self.manager = MsgManager(SentimentAnalyzer(
+            config['models']['version']), config['colors'], steps=0, transition=config['time']['transition'])
+
+        with open(filename) as f:
+            self.manager.set_data(json.load(f))
+
+    def update(self):
+        '''Update the text with the next message and the background with color corresponding to message sentiment.
+        '''
+        if self.manager.has_data():
+            msg, _, _, t, _ = self.manager.next_data()
+            print(msg)
+            time.sleep(t/1000)
+
+    def loop(self):
+        while(1):
+            self.update()
+
+
+class Verbose():
+    def __init__(self,
+                 config: Dict[str, Any],
+                 filename: str):
+        # Time to wait between actions
+        self.times = config['time']
+
+        # Data extracted from a JSON file
+        self.data: List[Any] = []
+
+        # colors to show
+        self.manager = MsgManager(SentimentAnalyzer(
+            config['models']['version']), config['colors'], steps=0, transition=config['time']['transition'])
+
+        with open(filename) as f:
+            self.manager.set_data(json.load(f))
+
+    def update(self):
+        '''Update the text with the next message and the background with color corresponding to message sentiment.
+        '''
+        if self.manager.has_data():
+            msg, _, _, t, label = self.manager.next_data()
+            print(f"#### Sequence : {msg} ---- Label : {label} ####")
+            time.sleep(t/1000)
+
+    def loop(self):
+        while(1):
+            self.update()
 
 
 def parse_args():
@@ -87,6 +150,10 @@ def parse_args():
         description='Runs La Ronde de Nuit demo.')
     parser.add_argument('-c', '--config', type=str, default='config/default.yaml',
                         help='Configuration file for the demonstration.')
+    parser.add_argument('-v', '--version', type=int, default=0,
+                        help='Version of visualisation.')
+    parser.add_argument('-f', '--file', type=str, default='',
+                        help='file to read data from.')
     opt = parser.parse_args()
 
     return opt
@@ -97,6 +164,19 @@ if __name__ == "__main__":
     with open(opt.config, 'r') as f:
         config = yaml.load(f, yaml.FullLoader)
 
-    root = tk.Tk()
-    timer = Ronde(root, config)
-    root.mainloop()
+    if opt.version == 0:
+        root = tk.Tk()
+        RondeColor(root, config)
+        root.mainloop()
+
+    if opt.version == 1:
+        logging.set_verbosity_error()
+
+        timer = RondeText(config, opt.file)
+        timer.loop()
+
+    if opt.version == 2:
+        logging.set_verbosity_debug()
+
+        verb = Verbose(config, opt.file)
+        verb.loop()

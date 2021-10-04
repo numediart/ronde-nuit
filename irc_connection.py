@@ -2,7 +2,7 @@
 '''
 import argparse
 
-from src.irc_bot import IrcBot
+from src.connection import IrcBot
 
 
 def main():

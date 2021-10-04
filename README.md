@@ -83,23 +83,28 @@ https://colab.research.google.com/drive/1PliF1rM7jO9RXFqBj4IOGi-PnVEqnzyV?usp=sh
 
 ## TODO
 
-* [ ] Visualisation
-  * [ ] Add time between display in configuration
-  * [ ] Change window display (make it as an option ?)
-* [x] Colors
-  * [x] Make ranging between two hexadecimal values
-  * [x] Make it as a class ?
-* [ ] Communication
-  * [ ] Receive data from SQL server
 * [ ] Model
   * [ ] Create code structure for retraining
   * [ ] Retrain with new annotation
   * [ ] Add to Colaboratory
-* [x] Misc
-  * [x] Cleanup colab
-  * [x] Add explanations to colab
-  * [ ] Download new data from Sylvain
-  * [x] Apply sentiment analysis to Sylvain's data
+* [ ] Misc
+  * [ ] Handle NN weight (online / offline)
+* [ ] Output
+  * [ ] GUI Collab
+
+
+PM : Code global application (communication serveur, gestion des poids du NN, triple sortie : GUI, chat et computation)
+    Gestion des poids : ok, sur la rapsberry
+    Rajouter une indication sur collab et dans le fichier de présentation sur comment télécharger les poids et les mettre à jour dans la raspberry
+PM : GUI du collab
+  TODO : Intégrer le ré-entraintemnt
+PM & LR : Port Raspberry Pi + génération image OS
+  TODO : Problèmes de librairies
+PM & LR : Document général de présentation
+  TODO : utilisation collab
+  TODO : utilisation des différentes visualisations
+
+
 ## Some references
 
 [Spacy](https://spacy.io/)
@@ -112,6 +117,8 @@ https://colab.research.google.com/drive/1PliF1rM7jO9RXFqBj4IOGi-PnVEqnzyV?usp=sh
 [Torch Dataset](https://pytorch.org/tutorials/beginner/data_loading_tutorial.html)
 [HuggingFace Fine-tuning](https://huggingface.co/transformers/training.html)
 
+
 Example of dataset (Allocine): 
+
 [Allocine Dataset Structure](https://github.com/TheophileBlard/french-sentiment-analysis-with-bert/blob/master/allocine_dataset/create_dataset.ipynb)
 [Allocine Dataset Code](https://github.com/huggingface/datasets/blob/master/datasets/allocine/allocine.py)

@@ -1,0 +1,9 @@
+---
+  colors:
+    bg: '#fff'
+    fg: '#fff'
+  time:
+    text: 1000
+    transition: 1000
+  models:
+    version: 0

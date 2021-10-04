@@ -1,104 +1,49 @@
-from __future__ import division, print_function
+import glob
+import os
 
-import json
-import warnings
+import numpy as np
+import pandas as pd
 
-import datasets
-import ftfy
-import torch
-from torch.utils.data import Dataset
-
-from .format import remove_irc_formatting
-
-# Ignore warnings
-warnings.filterwarnings("ignore")
+from sklearn.model_selection import train_test_split
 
 
-labels = {
-    'NEGATIVE': 0,
-    'POSITIVE': 1,
-    'NEUTRAL': 2
-}
-
-names = ['neg', 'pos']
-
-DESCRIPTION = """\
-Ronde de nuit Dataset.
-Dataset developed during the Ronde de nuit project, for sentiment analysis on French language in a specific context.
-"""
+def get_statistics(data):
+    print(
+        f"Positive ratio: {len(data.loc[data['label'] == 'positive']) / len(data)}")
+    print(
+        f"Neutral ratio: {len(data.loc[data['label'] == 'neutral']) / len(data)}")
+    print(
+        f"Negative ratio: {len(data.loc[data['label'] == 'negative']) / len(data)}")
 
 
-class RondeDataset(Dataset):
-    def __init__(self,
-                 filepath='data/dataset.json'):
-        with open(filepath, 'r') as f:
-            self.data = json.load(f)
+def merge_information(path):
+    lower = np.vectorize(str.lower)
+    sequences = []
+    labels = []
+    for elem in glob.glob(os.path.join(path, '*.csv')):
+        data = pd.read_csv(elem, delimiter=';')
+        data = data.dropna()
+        sequences += data['sequence'].to_list()
+        labels += data['label'].to_list()
 
-    def __len__(self):
-        return len(self.data)
-
-    def __get_item__(self, idx):
-        if torch.is_tensor(idx):
-            idx = idx.tolist()
-
-        elem = self.data[idx]
-
-        msg = elem["message"]
-        msg = remove_irc_formatting(elem['message'])
-        msg = ftfy.ftfy(msg)
-
-        return {'text': msg, 'label': labels[elem["label"]]}
-
-    def __str__(self):
-        data = {
-            'features': ['text', 'label'],
-            'num_rows': self.__len__()
-        }
-        return f"Dataset({data})"
+    df = pd.DataFrame()
+    df.insert(0, 'label', lower(labels))
+    df.insert(0, 'sequence', sequences)
+    return df
 
 
-class RondeConfig(datasets.BuilderConfig):
-    """BuilderConfig for Ronde de nuit dataset."""
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+def select_label_and_store(data: pd.DataFrame, label: str, location: str):
+    label_data = data.loc[data['label'] == label]
 
 
-class RondeBuilder(datasets.DatasetBuilder):
-    '''Dataset builder for Ronde de nuit project.
-    '''
+def create_splits(data, path, test_ratio=0.3):
+    train, test = train_test_split(data, test_size=test_ratio)
 
-    BUILDER_CONFIGS = [
-        RondeConfig(
-            name="ronde-de-nuit",
-            version=datasets.Version("1.0.0"),
-            description="Ronde de nuit dataset.",
-        ),
-    ]
+    os.makedirs(path, exist_ok=True)
+    train.to_csv(os.path.join(path, 'train.csv'), index=False)
+    test.to_csv(os.path.join(path, 'test.csv'), index=False)
 
-    def _info(self):
-        '''Returns dataset general info.
-        '''
-        return datasets.DatasetInfo(
-            description=DESCRIPTION,
-            features=datasets.Features(
-                {
-                    "text": datasets.Value(dtype="string", id=None),
-                    "label": datasets.ClassLabel(num_classes=2, names=names, names_file=None, id=None),
-                }
-            ),
-            supervised_keys=None,
-            homepage="https://github.com/numediart/ronde-nuit"
-        )
 
-    def _split_generator(self):
-        pass
-
-    def _generate_examples(self, filepath):
-        """Generate Ronde de nuit examples."""
-        with open(filepath, encoding="utf-8") as f:
-            for id_, row in enumerate(f):
-                data = json.loads(row)
-                review = data["review"]
-                label = "neg" if data["polarity"] == 0 else "pos"
-                yield id_, {"review": review, "label": label}
+def sort_data(inpath, outpath):
+    data = merge_information(inpath)
+    create_splits(data, outpath)

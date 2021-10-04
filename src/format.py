@@ -3,6 +3,7 @@
 import csv
 import json
 import re
+from html.parser import HTMLParser
 from typing import Dict, List
 
 import ftfy
@@ -179,6 +180,47 @@ def convert_txt_file(scrfile: str,
         json.dump(data, f, indent=4)
 
 
+# ---- #
+# HTML #
+# ---- #
+class RondeHTML(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.in_table = False
+        self.in_row = False
+        self.row = 0
+        self.to_read = []
+        self.latest = 0
+        self.cur_row = 0
+
+    def handle_starttag(self, tag, attrs):
+        if tag == 'table':
+            self.in_table = True
+        if tag == 'td':
+            self.in_row = True
+            self.row += 1
+
+    def handle_endtag(self, tag):
+        if tag == 'table':
+            self.in_table = False
+        if tag == 'td':
+            self.in_row = False
+        if tag == 'tr':
+            self.row = 0
+
+    def handle_data(self, data):
+        if self.in_row:
+            if self.row == 1:
+                self.cur_row = int(data)
+                self.latest = max(self.latest, self.cur_row)
+            if self.row == 3:
+                if self.cur_row == self.latest:
+                    self.to_read.append(str(data))
+
+
+# ---------- #
+# Formatting #
+# ---------- #
 def remove_irc_formatting(msg: str) -> str:
     '''Removes the tags for IRC formatting characters.
 
