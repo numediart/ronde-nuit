@@ -97,12 +97,7 @@ PM : Code global application (communication serveur, gestion des poids du NN, tr
     Gestion des poids : ok, sur la rapsberry
     Rajouter une indication sur collab et dans le fichier de présentation sur comment télécharger les poids et les mettre à jour dans la raspberry
 PM : GUI du collab
-  TODO : Intégrer le ré-entraintemnt
-PM & LR : Port Raspberry Pi + génération image OS
-  TODO : Problèmes de librairies
-PM & LR : Document général de présentation
-  TODO : utilisation collab
-  TODO : utilisation des différentes visualisations
+  TODO : Intégrer le ré-entraintement
 
 
 ## Some references

@@ -191,6 +191,7 @@ class RondeHTML(HTMLParser):
         self.row = 0
         self.to_read = []
         self.latest = 0
+        self.to_write = False
         self.cur_row = 0
 
     def handle_starttag(self, tag, attrs):
@@ -212,15 +213,19 @@ class RondeHTML(HTMLParser):
         if self.in_row:
             if self.row == 1:
                 self.cur_row = int(data)
-                self.latest = max(self.latest, self.cur_row)
+                if self.cur_row > self.latest:
+                    self.latest = self.cur_row
+                    self.to_write = True
             if self.row == 3:
-                if self.cur_row == self.latest:
+                if self.to_write:
                     self.to_read.append(str(data))
-
+                    self.to_write = False
 
 # ---------- #
 # Formatting #
 # ---------- #
+
+
 def remove_irc_formatting(msg: str) -> str:
     '''Removes the tags for IRC formatting characters.
 
