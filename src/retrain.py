@@ -2,14 +2,21 @@ import os
 
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
-from transformers import (DistilBertTokenizerFast,
-                          TFDistilBertForSequenceClassification, TFTrainer,
+from transformers import (CamembertTokenizerFast,
+                          TFCamembertForSequenceClassification, TFTrainer,
                           TFTrainingArguments)
 
 from .dataset import create_splits
+import numpy as np
 
 
-def retrain(model='distilbert-base-uncased',
+def compute_metrics(eval_pred):
+    metrics_dict = {}
+    predictions, labels = eval_pred
+    predictions = np.argmax(predictions, axis=1)
+
+
+def retrain(model='camembert-base',
             folder='data/sorted'):
 
     train_texts, train_labels = create_splits(
@@ -20,7 +27,7 @@ def retrain(model='distilbert-base-uncased',
     train_texts, val_texts, train_labels, val_labels = train_test_split(
         train_texts, train_labels, test_size=.2)
 
-    tokenizer = DistilBertTokenizerFast.from_pretrained(model)
+    tokenizer = CamembertTokenizerFast.from_pretrained(model)
 
     train_encodings = tokenizer(train_texts, truncation=True, padding=True)
     val_encodings = tokenizer(val_texts, truncation=True, padding=True)
@@ -48,18 +55,25 @@ def retrain(model='distilbert-base-uncased',
         weight_decay=0.01,               # strength of weight decay
         logging_dir='./logs',            # directory for storing logs
         logging_steps=10,
+        save_strategy='steps',
+        save_steps=10,
+        save_total_limit=5,
+        debug=True
     )
 
     with training_args.strategy.scope():
-        model = TFDistilBertForSequenceClassification.from_pretrained(
-            "distilbert-base-uncased")
+        model = TFCamembertForSequenceClassification.from_pretrained(
+            "camembert-base")
 
     trainer = TFTrainer(
         # the instantiated 🤗 Transformers model to be trained
         model=model,
         args=training_args,                  # training arguments, defined above
         train_dataset=train_dataset,         # training dataset
-        eval_dataset=val_dataset             # evaluation dataset
+        eval_dataset=val_dataset,            # evaluation dataset
+        compute_metrics=compute_metrics
     )
 
     trainer.train()
+    trainer.save_model('results')
+    return trainer
