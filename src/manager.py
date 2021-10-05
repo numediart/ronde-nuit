@@ -35,9 +35,9 @@ class ColorManager():
         return self.colors[ctype][self.index[ctype]]
 
     def get_next(self, label, ctype):
-        if label == 'positive' and self.index[ctype] < len(self.colors[ctype]) - 1:
+        if label == 'negative' and self.index[ctype] < len(self.colors[ctype]) - 1:
             self.index[ctype] += 1
-        if label == 'negative' and self.index[ctype] > 0:
+        if label == 'positive' and self.index[ctype] > 0:
             self.index[ctype] -= 1
         if label == 'neutral':
             if self.index[ctype] > len(self.colors[ctype])//2:
