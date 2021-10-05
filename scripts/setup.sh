@@ -1,7 +1,7 @@
 # Install general packages
 sudo apt update
 sudo apt upgrade -y
-sudo apt install -y git python3.7 python3-pip
+sudo apt install -y git python3.9 python3-pip
 sudo apt autoclean -y
 sudo apt autoremove -y
 

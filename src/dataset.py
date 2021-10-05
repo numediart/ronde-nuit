@@ -1,9 +1,9 @@
 import glob
 import os
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
-
 from sklearn.model_selection import train_test_split
 
 
@@ -36,7 +36,7 @@ def select_label_and_store(data: pd.DataFrame, label: str, location: str):
     label_data = data.loc[data['label'] == label]
 
 
-def create_splits(data, path, test_ratio=0.3):
+def create_csv_splits(data, path, test_ratio=0.3):
     train, test = train_test_split(data, test_size=test_ratio)
 
     os.makedirs(path, exist_ok=True)
@@ -46,4 +46,16 @@ def create_splits(data, path, test_ratio=0.3):
 
 def sort_data(inpath, outpath):
     data = merge_information(inpath)
-    create_splits(data, outpath)
+    create_csv_splits(data, outpath)
+
+
+def create_splits(path):
+    texts = []
+    labels = []
+
+    data = pd.read_csv(path)
+    data.loc[data['label'] != 'neutral']
+    texts = data['sequence'].to_list()
+    labels = [0 if x == 'negative' else 1 for x in data['label'].to_list()]
+
+    return texts, labels

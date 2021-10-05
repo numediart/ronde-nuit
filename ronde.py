@@ -209,8 +209,9 @@ class Verbose():
         '''Update the text with the next message and the background with color corresponding to message sentiment.
         '''
         if self.manager.has_data():
-            msg, _, _, t, label = self.manager.next_data()
-            print(f"#### Sequence : {msg} ---- Label : {label} ####")
+            msg, _, _, t, label, score = self.manager.next_data()
+            print(
+                f"#### Sequence: {msg} ---- Label: {label} ---- Score: {score}####")
             time.sleep(t/1000)
 
         else:

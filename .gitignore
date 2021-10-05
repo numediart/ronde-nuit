@@ -8,3 +8,6 @@ models.py
 merge.py
 debug.ipynb
 *.zip
+
+logs/
+results/
