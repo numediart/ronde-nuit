@@ -130,7 +130,7 @@ class RondeColor:
         '''Update the text with the next message and the background with color corresponding to message sentiment.
         '''
         if self.manager.has_data():
-            msg, fg, bg, time, _ = self.manager.next_data()
+            msg, fg, bg, time, _, _ = self.manager.next_data()
 
             # Update color
             self.label.configure(text='')
