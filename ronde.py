@@ -178,7 +178,7 @@ class RondeText():
         '''Update the text with the next message and the background with color corresponding to message sentiment.
         '''
         if self.manager.has_data():
-            msg, _, _, t, _ = self.manager.next_data()
+            msg, _, _, t, _, _ = self.manager.next_data()
             print(msg)
             time.sleep(t/1000)
         else:
@@ -200,7 +200,7 @@ class Verbose():
         self.data: List[Any] = []
 
         # colors to show
-        self.manager = MsgManager(SentimentAnalyzer(
+        self.manager = OnlineMsgManager(SentimentAnalyzer(
             config['models']['version']), config['colors'], steps=0, transition=config['time']['transition'])
 
         self.url = url
@@ -229,7 +229,7 @@ def parse_args():
                         help='Configuration file for the demonstration.')
     parser.add_argument('-v', '--version', type=int, default=0,
                         help='Version of visualisation.')
-    parser.add_argument('-f', '--file', type=str, default='',
+    parser.add_argument('-f', '--file', type=str, default='https://nightwatch.couzinetjacques.com/ReqMsg_01.php',
                         help='file to read data from.')
     opt = parser.parse_args()
 
@@ -244,7 +244,7 @@ if __name__ == "__main__":
     if opt.version == 0:
         root = tk.Tk()
         if opt.file == '':
-            RondeColor(root, config)
+            RondeColorFromFile(root, config)
         else:
             RondeColor(root, config, opt.file)
         root.mainloop()

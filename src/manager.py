@@ -127,6 +127,7 @@ class OnlineMsgManager():
         self.steps = steps
         self.transition = transition
         self.parser = RondeHTML()
+        self.data = []
 
     def parse_data(self, url):
         r = requests.get(url, allow_redirects=True)
@@ -154,15 +155,16 @@ class OnlineMsgManager():
         msg = remove_irc_formatting(elem)
         msg = ftfy.ftfy(msg)
 
-        _, label = self.analyzer.analyze(msg)
+        score, label = self.analyzer.analyze(msg)
 
         fg = self.colors.get_next(label, 'fg')
         bg = self.colors.get_next(label, "bg")
 
         if self.previous and self.steps > 0:
-            pmsg, pfg, pbg, _, plab = self.previous
+            pmsg, pfg, pbg, _, plab, psco = self.previous
             for ifg, ibg in zip(self.colors.colorRange(pfg, fg, self.steps),
                                 self.colors.colorRange(pbg, bg, self.steps)):
-                self.stack.append((pmsg, ifg, ibg, self.transition, plab))
+                self.stack.append(
+                    (pmsg, ifg, ibg, self.transition, plab, psco))
 
-        self.stack.append((msg, fg, bg, self.transition, label))
+        self.stack.append((msg, fg, bg, self.transition, label, score))
