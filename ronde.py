@@ -1,38 +1,53 @@
 '''Simple GUI for La Ronde de Nuit project.
 '''
 import argparse
-import json
+import os
 import time
 import tkinter as tk
 from tkinter import Misc, filedialog, ttk
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import yaml
-
-from src.analysis import SentimentAnalyzer
-from src.manager import MsgManager, OnlineMsgManager
 from transformers import logging
 
+from src.manager import AbstractMsgManager, MsgManager, OnlineMsgManager
 
-class RondeColorFromFile:
+
+class AbstractRonde():
     def __init__(self,
-                 parent: Misc,
-                 config: Dict[str, Any]):
+                 config: Dict[str, Any],
+                 parent: Optional[Misc] = None,
+                 url: str = ''):
         # Time to wait between actions
-        self.times = config['time']
+        self.transition = config['display']['transition']
+        # Weither text is shown
+        self.showText = config['display']['showText']
 
         # Data extracted from a JSON file
         self.data: List[Any] = []
         self.display: List[Any] = []
 
         # parent containing GUI
-        self.root = parent
+        if parent:
+            self.root = parent
 
         # colors to show
-        self.manager = MsgManager(SentimentAnalyzer(
-            config['models']['version']), config['colors'], transition=config['time']['transition'])
+        self.url = url
+        if url == '' or os.path.isfile(url):
+            self.manager: AbstractMsgManager = MsgManager(config)
+        else:
+            self.manager = OnlineMsgManager(config)
 
-        self.create_window()
+    def create_window(self):
+        pass
+
+
+class RondeColorFromFile(AbstractRonde):
+    def __init__(self,
+                 config: Dict[str, Any],
+                 parent: Misc,
+                 url: str = ''):
+        super().__init__(config, parent, url)
 
     def create_window(self):
         # Frame containing the text and a selection button (for the messages and their labels)
@@ -76,35 +91,19 @@ class RondeColorFromFile:
 
         File should be a JSON file.
         '''
-        filename = filedialog.askopenfilename()
-        with open(filename) as f:
-            self.manager.set_data(json.load(f))
+        self.url = filedialog.askopenfilename()
+        self.manager.parse_data(self.url)
 
         self.button.pack_forget()
         self.root.after(100, self.update)
 
 
-class RondeColor:
+class RondeColor(AbstractRonde):
     def __init__(self,
-                 parent: Misc,
                  config: Dict[str, Any],
-                 url: str = 'https://nightwatch.couzinetjacques.com/ReqMsg_01.php'):
-        # Time to wait between actions
-        self.times = config['time']
-
-        # Data extracted from a JSON file
-        self.data: List[Any] = []
-        self.display: List[Any] = []
-
-        # parent containing GUI
-        self.root = parent
-
-        # colors to show
-        self.manager = OnlineMsgManager(SentimentAnalyzer(
-            config['models']['version']), config['colors'], transition=config['time']['transition'])
-
-        self.url = url
-        self.create_window()
+                 parent: Misc,
+                 url: str = ''):
+        super().__init__(config, parent, url)
 
     def create_window(self):
         # Frame containing the text and a selection button (for the messages and their labels)
@@ -130,14 +129,15 @@ class RondeColor:
         '''Update the text with the next message and the background with color corresponding to message sentiment.
         '''
         if self.manager.has_data():
-            msg, fg, bg, time, _, _ = self.manager.next_data()
+            _, fg, bg, _, _ = self.manager.next_data()
 
             # Update color
             self.label.configure(text='')
             self.update_color(fg, bg)
-            self.root.after(time, self.update)
+            self.root.after(self.manager.transition, self.update)
         else:
             self.manager.parse_data(self.url)
+            self.root.after(self.manager.transition, self.update)
 
     def update_color(self, fg, bg):
         """
@@ -157,67 +157,46 @@ class RondeColor:
         self.root.after(100, self.update)
 
 
-class RondeText():
-
+class RondeText(AbstractRonde):
     def __init__(self,
                  config: Dict[str, Any],
-                 url: str):
-        # Time to wait between actions
-        self.times = config['time']
-
-        # Data extracted from a JSON file
-        self.data: List[Any] = []
-
-        # colors to show
-        self.manager = OnlineMsgManager(SentimentAnalyzer(
-            config['models']['version']), config['colors'], steps=0, transition=config['time']['transition'])
-
-        self.url = url
+                 url: str = ''):
+        super().__init__(config, None, url)
 
     def update(self):
         '''Update the text with the next message and the background with color corresponding to message sentiment.
         '''
         if self.manager.has_data():
-            msg, _, _, t, _, _ = self.manager.next_data()
+            msg, _, _, _, _ = self.manager.next_data()
             print(msg)
-            time.sleep(t/1000)
+            time.sleep(self.manager.transition/1000)
         else:
             self.manager.parse_data(self.url)
 
-    def loop(self):
+    def mainloop(self):
         while(1):
             self.update()
 
 
-class Verbose():
+class Verbose(AbstractRonde):
     def __init__(self,
                  config: Dict[str, Any],
-                 url: str):
-        # Time to wait between actions
-        self.times = config['time']
-
-        # Data extracted from a JSON file
-        self.data: List[Any] = []
-
-        # colors to show
-        self.manager = OnlineMsgManager(SentimentAnalyzer(
-            config['models']['version']), config['colors'], steps=0, transition=config['time']['transition'])
-
-        self.url = url
+                 url: str = ''):
+        super().__init__(config, None, url)
 
     def update(self):
         '''Update the text with the next message and the background with color corresponding to message sentiment.
         '''
         if self.manager.has_data():
-            msg, _, _, t, label, score = self.manager.next_data()
+            msg, _, _, label, score = self.manager.next_data()
             print(
                 f"#### Sequence: {msg} ---- Label: {label} ---- Score: {score}####")
-            time.sleep(t/1000)
+            time.sleep(self.manager.transition/1000)
 
         else:
             self.manager.parse_data(self.url)
 
-    def loop(self):
+    def mainloop(self):
         while(1):
             self.update()
 
@@ -225,11 +204,14 @@ class Verbose():
 def parse_args():
     parser = argparse.ArgumentParser(
         description='Runs La Ronde de Nuit demo.')
-    parser.add_argument('-c', '--config', type=str, default='config/default.yaml',
+    parser.add_argument('-c', '--config', type=str,
+                        default='config/default.yaml',
                         help='Configuration file for the demonstration.')
-    parser.add_argument('-v', '--version', type=int, default=0,
+    parser.add_argument('-v', '--version', type=int,
+                        default=0,
                         help='Version of visualisation.')
-    parser.add_argument('-f', '--file', type=str, default='https://nightwatch.couzinetjacques.com/ReqMsg_01.php',
+    parser.add_argument('-f', '--file', type=str,
+                        default='https://nightwatch.couzinetjacques.com/ReqMsg_01.php',
                         help='file to read data from.')
     opt = parser.parse_args()
 
@@ -244,19 +226,18 @@ if __name__ == "__main__":
     if opt.version == 0:
         root = tk.Tk()
         if opt.file == '':
-            RondeColorFromFile(root, config)
+            RondeColorFromFile(config, root)
         else:
-            RondeColor(root, config, opt.file)
-        root.mainloop()
+            RondeColor(config, root, opt.file)
 
-    if opt.version == 1:
+    elif opt.version == 1:
         logging.set_verbosity_error()
 
-        timer = RondeText(config, opt.file)
-        timer.loop()
+        root = RondeText(config, opt.file)
 
-    if opt.version == 2:
+    elif opt.version == 2:
         logging.set_verbosity_debug()
 
-        verb = Verbose(config, opt.file)
-        verb.loop()
+        root = Verbose(config, opt.file)
+
+    root.mainloop()

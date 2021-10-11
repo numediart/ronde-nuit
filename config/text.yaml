@@ -2,8 +2,11 @@
   colors:
     bg: '#fff'
     fg: '#fff'
-  time:
-    text: 1000
-    transition: 1000
+  display:
+    steps: 0
+    transition: 10
+    showText: False
+    printText: True
+    toLoop: True
   models:
     version: 0

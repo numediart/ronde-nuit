@@ -1,5 +1,6 @@
 import os
 
+import numpy as np
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from transformers import (CamembertTokenizerFast,
@@ -7,7 +8,6 @@ from transformers import (CamembertTokenizerFast,
                           TFTrainingArguments)
 
 from .dataset import create_splits
-import numpy as np
 
 
 def compute_metrics(eval_pred):
@@ -16,8 +16,9 @@ def compute_metrics(eval_pred):
     predictions = np.argmax(predictions, axis=1)
 
 
-def retrain(model='camembert-base',
-            folder='data/sorted'):
+def retrain(folder='data/sorted',
+            token_model='camembert-base',
+            sentiment_model='tblard/tf-allocine'):
 
     train_texts, train_labels = create_splits(
         os.path.join(folder, 'train.csv'))
@@ -27,7 +28,7 @@ def retrain(model='camembert-base',
     train_texts, val_texts, train_labels, val_labels = train_test_split(
         train_texts, train_labels, test_size=.2)
 
-    tokenizer = CamembertTokenizerFast.from_pretrained(model)
+    tokenizer = CamembertTokenizerFast.from_pretrained(token_model)
 
     train_encodings = tokenizer(train_texts, truncation=True, padding=True)
     val_encodings = tokenizer(val_texts, truncation=True, padding=True)
@@ -63,16 +64,14 @@ def retrain(model='camembert-base',
 
     with training_args.strategy.scope():
         model = TFCamembertForSequenceClassification.from_pretrained(
-            "camembert-base")
+            sentiment_model)
 
-    trainer = TFTrainer(
-        # the instantiated 🤗 Transformers model to be trained
-        model=model,
-        args=training_args,                  # training arguments, defined above
-        train_dataset=train_dataset,         # training dataset
-        eval_dataset=val_dataset,            # evaluation dataset
-        compute_metrics=compute_metrics
-    )
+    trainer = TFTrainer(model=model,
+                        args=training_args,
+                        train_dataset=train_dataset,
+                        eval_dataset=val_dataset,
+                        compute_metrics=compute_metrics
+                        )
 
     trainer.train()
     trainer.save_model('results')

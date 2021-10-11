@@ -107,7 +107,19 @@ def analyze_file(srcfile: str,
 
 def get_tokens(sentence,
                model="tblard/tf-allocine"):
-    '''
+    '''Returns token of a given sentence using specific model.
+
+    Args
+    ----
+    sentence : str
+        sentence to extract token from
+    model : str
+        name of model to use
+
+    Returns
+    -------
+    list of str
+        list of tokens extracted from the sentence
     '''
     tokenizer = AutoTokenizer.from_pretrained(model)
     encoded = tokenizer.encode(sentence)

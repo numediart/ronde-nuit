@@ -184,48 +184,53 @@ def convert_txt_file(scrfile: str,
 # HTML #
 # ---- #
 class RondeHTML(HTMLParser):
+    '''HTML parser for La Ronde de Nuit specific html table.
+
+    <table>
+        <tbody>
+            <tr>
+                <td> </td>
+            </tr>
+        </tbody>
+    </table>
+    '''
+
     def __init__(self):
         super().__init__()
-        self.in_table = False
-        self.in_row = False
+
+        self.col = 0
         self.row = 0
-        self.to_read = []
-        self.latest = 0
         self.to_write = False
-        self.cur_row = 0
+        self.stack = []
 
     def handle_starttag(self, tag, attrs):
-        if tag == 'table':
-            self.in_table = True
+        '''
+        '''
         if tag == 'td':
-            self.in_row = True
+            self.col += 1
+        if tag == 'tr':
             self.row += 1
 
     def handle_endtag(self, tag):
-        if tag == 'table':
-            self.in_table = False
-        if tag == 'td':
-            self.in_row = False
+        '''
+        '''
         if tag == 'tr':
-            self.row = 0
+            self.col = 0
 
     def handle_data(self, data):
-        if self.in_row:
-            if self.row == 1:
-                self.cur_row = int(data)
-                if self.cur_row > self.latest:
-                    self.latest = self.cur_row
-                    self.to_write = True
-            if self.row == 3:
-                if self.to_write:
-                    self.to_read.append(str(data))
-                    self.to_write = False
+        '''
+        '''
+        if self.col == 1 and self.row > self.latest:
+            self.latest = self.row
+            self.to_write = True
+        if self.col == 3 and self.to_write:
+            self.stack.append(str(data))
+            self.to_write = False
+
 
 # ---------- #
 # Formatting #
 # ---------- #
-
-
 def remove_irc_formatting(msg: str) -> str:
     '''Removes the tags for IRC formatting characters.
 
