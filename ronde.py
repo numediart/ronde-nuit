@@ -5,7 +5,7 @@ import os
 import time
 import tkinter as tk
 from tkinter import Misc, filedialog, ttk
-from typing import Any, Dict, List, Optional, Namespace
+from typing import Any, Dict, List, Optional
 
 import yaml
 from transformers import logging
@@ -13,7 +13,7 @@ from transformers import logging
 from src.manager import AbstractMsgManager, JsonMsgManager, OnlineMsgManager
 
 
-class AbstractRonde():
+class RondeGUI():
     def __init__(self,
                  config: Dict[str, Any],
                  parent: Optional[Misc] = None,
@@ -30,104 +30,51 @@ class AbstractRonde():
 
         # colors to show
         self.url = url
-        if url == '' or os.path.isfile(url):
+        if self.url == '' or os.path.isfile(self.url):
             self.manager: AbstractMsgManager = JsonMsgManager(config)
         else:
             self.manager = OnlineMsgManager(config)
 
-    def create_window(self):
-        pass
-
-    def mainloop(self):
         if self.root:
-            self.root.mainloop()
-        else:
-            while(1):
-                self.update()
-
-
-class RondeColorFromFile(AbstractRonde):
-    def __init__(self,
-                 config: Dict[str, Any],
-                 parent: Misc,
-                 url: str = ''):
-        super().__init__(config, parent, url)
+            self.create_window()
 
     def create_window(self):
         # Frame containing the text and a selection button (for the messages and their labels)
         self.frame = tk.Frame(master=self.root, background="black")
 
         # To show the messages
+        labelTxt = "Welcome to 'La Ronde de Nuit'."
+        buttonTxt = "Run"
+        if self.url == '':
+            labelTxt += "\nPlease select a JSON file below:"
+            buttonTxt = "Select File"
+
         self.label = tk.Label(master=self.frame,
-                              text="Welcome to La Ronde de Nuit.\nPlease select a JSON file below:",
+                              text=labelTxt,
                               font=("Arial", 30), background="black", foreground='white',
                               wraplength=600,
                               justify='center')
 
         # To select a file
         self.button = ttk.Button(
-            master=self.frame, text="Select File", command=self.openfile)
+            master=self.frame, text=buttonTxt, command=self.openfile)
 
         self.label.pack(fill=tk.BOTH, expand=True)
         self.button.pack(side=tk.BOTTOM, expand=True)
         self.frame.pack(fill=tk.BOTH, side=tk.TOP, expand=True)
-
-    def update(self):
-        '''Update the text with the next message and the background with color corresponding to message sentiment.
-        '''
-        if self.manager.has_messages():
-            msg, fg, bg, time, _ = self.manager.next_data()
-
-            # Update color
-            self.label.configure(text='')
-            self.update_color(fg, bg)
-            self.root.after(time, self.update)
-
-    def update_color(self, fg, bg):
-        """
-        """
-        self.frame.configure(background=bg)
-        self.label.configure(background=bg)
-        self.label.configure(foreground=fg)
 
     def openfile(self):
         '''Opens a file and store data. Calls update afterward.
 
         File should be a JSON file.
         '''
-        self.url = filedialog.askopenfilename()
+        if self.url == '':
+            self.url = filedialog.askopenfilename()
+
         self.manager.parse_data(self.url)
 
         self.button.pack_forget()
         self.root.after(100, self.update)
-
-
-class RondeColor(AbstractRonde):
-    def __init__(self,
-                 config: Dict[str, Any],
-                 parent: Misc,
-                 url: str = ''):
-        super().__init__(config, parent, url)
-
-    def create_window(self):
-        # Frame containing the text and a selection button (for the messages and their labels)
-        self.frame = tk.Frame(master=self.root, background="black")
-
-        # To show the messages
-        self.label = tk.Label(master=self.frame,
-                              text="Welcome to La Ronde de Nuit.\n",
-                              font=("Arial", 30), background="black", foreground='white',
-                              wraplength=600,
-                              justify='center')
-
-        # To select server url
-        # 'https://nightwatch.couzinetjacques.com/ReqMsg_01.php'
-        self.button = ttk.Button(
-            master=self.frame, text="Run", command=self.openfile)
-
-        self.label.pack(fill=tk.BOTH, expand=True)
-        self.button.pack(side=tk.BOTTOM, expand=True)
-        self.frame.pack(fill=tk.BOTH, side=tk.TOP, expand=True)
 
     def update(self):
         '''Update the text with the next message and the background with color corresponding to message sentiment.
@@ -144,13 +91,6 @@ class RondeColor(AbstractRonde):
             self.manager.parse_data(self.url)
         self.wait()
 
-    def update_color(self, fg, bg):
-        """
-        """
-        self.frame.configure(background=bg)
-        self.label.configure(background=bg)
-        self.label.configure(foreground=fg)
-
     def update_text(self, msg, label, score):
         """Update the text.
 
@@ -163,8 +103,11 @@ class RondeColor(AbstractRonde):
         score : float
             related score
         """
-        if self.config['display']['text']:
-            self.label.configure(text=msg)
+        if self.root:
+            if self.config['display']['text']:
+                self.label.configure(text=msg)
+            else:
+                self.label.configure(text='')
 
         if self.config['print']['text']:
             if self.config['print']['mode'] == 'demo':
@@ -173,59 +116,27 @@ class RondeColor(AbstractRonde):
                 print(
                     f"#### Sequence: {msg} ---- Label: {label} ---- Score: {score}####")
 
+    def update_color(self, fg, bg):
+        """
+        """
+        self.frame.configure(background=bg)
+        self.label.configure(background=bg)
+        self.label.configure(foreground=fg)
+
     def wait(self):
         """Make the process wait.
         """
         if self.root:
-            self.root.after(self.manager.transition, self.update)
+            self.root.after(self.config['manager']['transition'], self.update)
         else:
-            time.sleep(self.manager.transition/1000)
-
-    def openfile(self):
-        '''Opens a file and store data. Calls update afterward.
-
-        File should be a JSON file.
-        '''
-        self.manager.parse_data(self.url)
-
-        self.button.pack_forget()
-        self.root.after(100, self.update)
-
-
-class RondeText(AbstractRonde):
-    def __init__(self,
-                 config: Dict[str, Any],
-                 url: str = ''):
-        super().__init__(config, None, url)
-
-    def update(self):
-        '''Update the text with the next message and the background with color corresponding to message sentiment.
-        '''
-        if self.manager.has_messages():
-            msg, _, _, _, _ = self.manager.next_data()
-            print(msg)
-            time.sleep(self.config['manager']['transition']/1000)
-        else:
-            self.manager.parse_data(self.url)
-
-
-class Verbose(AbstractRonde):
-    def __init__(self,
-                 config: Dict[str, Any],
-                 url: str = ''):
-        super().__init__(config, None, url)
-
-    def update(self):
-        '''Update the text with the next message and the background with color corresponding to message sentiment.
-        '''
-        if self.manager.has_messages():
-            msg, _, _, label, score = self.manager.next_data()
-            print(
-                f"#### Sequence: {msg} ---- Label: {label} ---- Score: {score}####")
             time.sleep(self.config['manager']['transition']/1000)
 
+    def mainloop(self):
+        if self.root:
+            self.root.mainloop()
         else:
-            self.manager.parse_data(self.url)
+            while(1):
+                self.update()
 
 
 def set_verbosity(config: Dict):
@@ -239,23 +150,23 @@ def set_verbosity(config: Dict):
           - 'mode' which defines the level of verbosity. Can either be
             'demo' (low level of verbosity) or 'debug' (highest level)
     '''
-    if config['print']['text']:
-        if config['print']['demo']:
+    if config['text']:
+        if config['mode'] == 'demo':
             logging.set_verbosity_error()
-        elif config['print']['debug']:
+        elif config['mode'] == 'debug':
             logging.set_verbosity_debug()
         else:
             logging.set_verbosity_info()
     else:
-        logging.set_verbosity_info()
+        logging.set_verbosity_error()
 
 
-def parse_args() -> Namespace:
+def parse_args():
     '''Define an argument parser and returns the corresponding dictionary.
 
     Returns
     -------
-    namespace
+    dict
         dictionary of input arguments
     '''
     parser = argparse.ArgumentParser(
@@ -263,9 +174,6 @@ def parse_args() -> Namespace:
     parser.add_argument('-c', '--config', type=str,
                         default='config/default.yaml',
                         help='Configuration file for the demonstration.')
-    parser.add_argument('-v', '--version', type=int,
-                        default=0,
-                        help='Version of visualisation.')
     parser.add_argument('-f', '--file', type=str,
                         default='https://nightwatch.couzinetjacques.com/ReqMsg_01.php',
                         help='file to read data from.')
@@ -281,16 +189,15 @@ if __name__ == "__main__":
         config = yaml.load(f, yaml.FullLoader)
 
     # Adapt verbosity
+    set_verbosity(config['print'])
 
-    if opt.version == 0:
+    # Define GUI or not
+    root = None
+    if config['display']['colors'] or config['display']['text']:
         root = tk.Tk()
-        if opt.file == '':
-            ronde: AbstractRonde = RondeColorFromFile(config, root)
-        else:
-            ronde = RondeColor(config, root, opt.file)
-    if opt.version == 1:
-        ronde = RondeText(config, opt.file)
-    if opt.version == 2:
-        ronde = Verbose(config, opt.file)
 
+    # Create the process
+    ronde = RondeGUI(config, root, opt.file)
+
+    # Run the mainloop
     ronde.mainloop()
