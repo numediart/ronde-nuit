@@ -3,7 +3,7 @@ __pycache__/
 .vscode 
 
 # Local files used for testing, not necessary for now.
-images/doc/
+images/
 models.py
 merge.py
 debug.ipynb
