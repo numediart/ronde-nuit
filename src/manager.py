@@ -1,6 +1,6 @@
 import abc
 import json
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import ftfy
 import requests
@@ -11,6 +11,20 @@ from .format import RondeHTML, remove_irc_formatting
 
 
 class ColorManager():
+    '''Manages background and foreground (text) colors.
+
+    Attributes
+    ----------
+    colors : dict
+        dictionary contains 2 keys:
+          - fg, list of foreground colors or str of unique color
+          - bg, list of background colors or str of unique color
+    index : dict
+        dictionary containing 2 keys:
+          - fg, index of the current foreground color in colors
+          - bg, index of the current background color in colors
+    '''
+
     def __init__(self,
                  colors: Dict):
         """Set the color dictionnary to new values.
@@ -67,10 +81,15 @@ class ColorManager():
         str
             next color for element
         '''
+        # Negative value moves to next index
         if label == 'negative' and self.index[ctype] < len(self.colors[ctype]) - 1:
             self.index[ctype] += 1
+
+        # Positive value moves to previous index
         if label == 'positive' and self.index[ctype] > 0:
             self.index[ctype] -= 1
+
+        # Neutral moves closer to "center" index (half the length of array)
         if label == 'neutral':
             if self.index[ctype] > len(self.colors[ctype])//2:
                 self.index[ctype] -= 1
@@ -100,45 +119,116 @@ class ColorManager():
         Iterator
             iterator on colors in the range
         """
-        objColorStart = Color(cstart)
-        objColorEnd = Color(cend)
-
-        for elem in list(objColorStart.range_to(objColorEnd, steps)):
+        for elem in list(Color(cstart).range_to(Color(cend), steps)):
             yield elem
 
 
 class AbstractMsgManager():
+    '''Generic class to handle messages.
+
+    Class inheriting this should define the parse_data method, which defines
+    how to load a list of messages.
+
+    The general behavior is as follow:
+      - messages are loaded from a given source (typically txt file or url address)
+      - each message is analyzed and added to a stack for treatment
+      - once loaded messages stack is empty, look for new input (usually if input is url)
+      - loop through previous steps
+
+    Attributes
+    ----------
+    analyzer : SentimentAnalyzer
+        model to analyze sentiment on a sequence
+    stack : list of tuple
+        list of tuple containing information on the next message to handle.
+        Tuple structure is (<msg>, <fg>, <bg>, <label>, <score>) where
+          - <msg> is the message
+          - <fg> is its color
+          - <bg> is the background color
+          - <label> is the detected sentiment label
+          - <score> is the analysis confidence
+    colors : ColorManager
+        manager to handle the colors and their transition
+    steps : int
+        number of steps for color grading between 2 messages
+    messages : list
+        list of messages to be handled.
+    previous : tuple
+        tuple of previous read message. This is mainly used to handle color range.
+    '''
+
     def __init__(self,
                  config: Dict):
+        '''Creates a MsgManager
+
+        Args
+        ----
+        config : dict
+            dictionary of configuration for the manager. Dictionary should have:
+              - 'models' which should contain
+                - 'version', an int for the model version
+                - 'threshold', a float to define the score threshold under which label is set to 'neutral'
+              - 'colors', the color manager configuration
+              - 'manager' which should contain
+                - 'steps', an int representing the number of steps for color ranging
+        '''
         self.analyzer = SentimentAnalyzer(
             config['models']['version'], config['models']['threshold'])
         self.stack: List[Any] = []
 
         self.colors = ColorManager(config['colors'])
         self.steps = config['manager']['steps']
-        self.transition = config['manager']['transition']
 
-        self.data: List[Any] = []
+        self.messages: List[Any] = []
         self.previous = None
 
-    def set_data(self, data):
-        self.data = data
+    def set_messages(self,
+                     messages: List[str]) -> None:
+        '''Set the list of messages.
 
-    def has_data(self):
-        return len(self.data)
+        Args
+        ----
+        messages : list of str
+            list of messages to set in the stack
+        '''
+        self.messages = messages.copy()
 
-    def next_data(self):
+    def has_messages(self) -> bool:
+        '''Returns if data has a message to be read.
+
+        Returns
+        -------
+        bool
+            True if data has any element, False otherwise
+        '''
+        return any(self.messages)
+
+    def next_data(self) -> Optional[Any]:
+        '''Get the next message in data stack.
+
+        Returns
+        -------
+        tuple
+            data related to the next message
+        '''
         if not self.stack:
-            if self.data:
+            if self.has_messages():
                 self.update_stack()
 
         if self.stack:
             self.previous = self.stack.pop(0)
             return self.previous
-        return []
+        return None
 
-    def update_stack(self):
-        '''
+    def update_stack(self) -> None:
+        '''Update the stack of handled messages.
+
+        Method will:
+          - get the next message from messages stack
+          - analyze the message
+          - get the next colors depending on the label
+            - create a range of colors between previous and current color if needed
+          - add new info to the stack
         '''
         msg = self.get_next_msg()
 
@@ -156,33 +246,59 @@ class AbstractMsgManager():
 
         self.stack.append((msg, fg, bg, label, score))
 
-    def get_next_msg(self):
+    def get_next_msg(self) -> str:
+        '''Collect and format the next message read.
+
+        Returns
+        -------
+        str
+            formatted next message to handle
         '''
-        '''
-        msg = remove_irc_formatting(self.data.pop(0))
+        msg = remove_irc_formatting(self.messages.pop(0))
         return ftfy.ftfy(msg)
 
     @abc.abstractmethod
-    def parse_data(self):
+    def parse_data(self,
+                   url: str) -> None:
+        '''This method loads from data from an url.
+
+        No returns, but messages attribute should be updated with new messages.
+
+        Args
+        ----
+        url : str
+            path to a file or webpage to handle messages.
+        '''
         pass
 
 
-class MsgManager(AbstractMsgManager):
-    '''
+class JsonMsgManager(AbstractMsgManager):
+    '''Class to handle messages from a JSON file.
+
+    Json file should be an array of dictionary.
+    Each dictionary should have a key named 'message', which is the message to analyze.
     '''
 
     def __init__(self,
                  config: Dict):
         super().__init__(config)
 
-    def parse_data(self, url):
+    def parse_data(self,
+                   url: str) -> None:
         with open(url) as f:
             msgs = [x['message'] for x in json.load(f)]
-            self.set_data(msgs)
+            self.set_messages(msgs)
 
 
 class OnlineMsgManager(AbstractMsgManager):
-    '''Colors on Tkinter should be #xxyyzz where xxyyzz is an hexadecimal number.
+    '''Class to handle messages from an HTML table.
+
+    Handle table structure is defined in src.format.RondeHTML class.
+
+    Attributes
+    ----------
+    parser : RondeHTML
+        HTML parser used to handle data from the HTML table.
     '''
 
     def __init__(self,
@@ -190,7 +306,8 @@ class OnlineMsgManager(AbstractMsgManager):
         super().__init__(config)
         self.parser = RondeHTML()
 
-    def parse_data(self, url):
+    def parse_data(self,
+                   url: str) -> None:
         r = requests.get(url, allow_redirects=True)
         self.parser.feed(r.text)
-        self.set_data(self.parser.stack)
+        self.set_messages(self.parser.stack)

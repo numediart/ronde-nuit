@@ -5,12 +5,12 @@ import os
 import time
 import tkinter as tk
 from tkinter import Misc, filedialog, ttk
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Namespace
 
 import yaml
 from transformers import logging
 
-from src.manager import AbstractMsgManager, MsgManager, OnlineMsgManager
+from src.manager import AbstractMsgManager, JsonMsgManager, OnlineMsgManager
 
 
 class AbstractRonde():
@@ -26,18 +26,24 @@ class AbstractRonde():
         self.display: List[Any] = []
 
         # parent containing GUI
-        if parent:
-            self.root = parent
+        self.root = parent
 
         # colors to show
         self.url = url
         if url == '' or os.path.isfile(url):
-            self.manager: AbstractMsgManager = MsgManager(config)
+            self.manager: AbstractMsgManager = JsonMsgManager(config)
         else:
             self.manager = OnlineMsgManager(config)
 
     def create_window(self):
         pass
+
+    def mainloop(self):
+        if self.root:
+            self.root.mainloop()
+        else:
+            while(1):
+                self.update()
 
 
 class RondeColorFromFile(AbstractRonde):
@@ -69,7 +75,7 @@ class RondeColorFromFile(AbstractRonde):
     def update(self):
         '''Update the text with the next message and the background with color corresponding to message sentiment.
         '''
-        if self.manager.has_data():
+        if self.manager.has_messages():
             msg, fg, bg, time, _ = self.manager.next_data()
 
             # Update color
@@ -126,7 +132,7 @@ class RondeColor(AbstractRonde):
     def update(self):
         '''Update the text with the next message and the background with color corresponding to message sentiment.
         '''
-        if self.manager.has_data():
+        if self.manager.has_messages():
             msg, fg, bg, label, score = self.manager.next_data()
 
             # Update color
@@ -195,16 +201,12 @@ class RondeText(AbstractRonde):
     def update(self):
         '''Update the text with the next message and the background with color corresponding to message sentiment.
         '''
-        if self.manager.has_data():
+        if self.manager.has_messages():
             msg, _, _, _, _ = self.manager.next_data()
             print(msg)
-            time.sleep(self.manager.transition/1000)
+            time.sleep(self.config['manager']['transition']/1000)
         else:
             self.manager.parse_data(self.url)
-
-    def mainloop(self):
-        while(1):
-            self.update()
 
 
 class Verbose(AbstractRonde):
@@ -216,21 +218,46 @@ class Verbose(AbstractRonde):
     def update(self):
         '''Update the text with the next message and the background with color corresponding to message sentiment.
         '''
-        if self.manager.has_data():
+        if self.manager.has_messages():
             msg, _, _, label, score = self.manager.next_data()
             print(
                 f"#### Sequence: {msg} ---- Label: {label} ---- Score: {score}####")
-            time.sleep(self.manager.transition/1000)
+            time.sleep(self.config['manager']['transition']/1000)
 
         else:
             self.manager.parse_data(self.url)
 
-    def mainloop(self):
-        while(1):
-            self.update()
+
+def set_verbosity(config: Dict):
+    '''Set machine learning models verbosity.
+
+    Args
+    ----
+    config : dict
+        dictionary of configuration. Should be organized as
+          - 'text' which defines if text is visible in command line
+          - 'mode' which defines the level of verbosity. Can either be
+            'demo' (low level of verbosity) or 'debug' (highest level)
+    '''
+    if config['print']['text']:
+        if config['print']['demo']:
+            logging.set_verbosity_error()
+        elif config['print']['debug']:
+            logging.set_verbosity_debug()
+        else:
+            logging.set_verbosity_info()
+    else:
+        logging.set_verbosity_info()
 
 
-def parse_args():
+def parse_args() -> Namespace:
+    '''Define an argument parser and returns the corresponding dictionary.
+
+    Returns
+    -------
+    namespace
+        dictionary of input arguments
+    '''
     parser = argparse.ArgumentParser(
         description='Runs La Ronde de Nuit demo.')
     parser.add_argument('-c', '--config', type=str,
@@ -248,25 +275,22 @@ def parse_args():
 
 
 if __name__ == "__main__":
+    # Load parameters and config file
     opt = parse_args()
     with open(opt.config, 'r') as f:
         config = yaml.load(f, yaml.FullLoader)
 
+    # Adapt verbosity
+
     if opt.version == 0:
         root = tk.Tk()
         if opt.file == '':
-            RondeColorFromFile(config, root)
+            ronde: AbstractRonde = RondeColorFromFile(config, root)
         else:
-            RondeColor(config, root, opt.file)
+            ronde = RondeColor(config, root, opt.file)
+    if opt.version == 1:
+        ronde = RondeText(config, opt.file)
+    if opt.version == 2:
+        ronde = Verbose(config, opt.file)
 
-    elif opt.version == 1:
-        logging.set_verbosity_error()
-
-        root = RondeText(config, opt.file)
-
-    elif opt.version == 2:
-        logging.set_verbosity_debug()
-
-        root = Verbose(config, opt.file)
-
-    root.mainloop()
+    ronde.mainloop()
