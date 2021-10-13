@@ -195,13 +195,14 @@ class RondeHTML(HTMLParser):
     </table>
     '''
 
-    def __init__(self):
+    def __init__(self, loop: bool = False):
         super().__init__()
 
         self.col = 0
         self.row = 0
         self.to_write = False
-        self.stack = []
+        self.stack: List[str] = []
+        self.loop = loop
 
     def handle_starttag(self, tag, attrs):
         '''
@@ -220,12 +221,16 @@ class RondeHTML(HTMLParser):
     def handle_data(self, data):
         '''
         '''
-        if self.col == 1 and self.row > self.latest:
-            self.latest = self.row
-            self.to_write = True
+        if self.col == 1:
+            if self.loop and self.row > self.latest:
+                self.latest = self.row
+                self.to_write = True
+            else:
+                self.to_write = True
         if self.col == 3 and self.to_write:
             self.stack.append(str(data))
-            self.to_write = False
+            if not self.loop:
+                self.to_write = False
 
 
 # ---------- #

@@ -11,7 +11,7 @@
     text: False      # Show text on top of colors
   print:         
     text: True       # Print text in the command line
-    mode: "demo"     # Print text or debug info. Can either be demo or debug
+    mode: "debug"    # Print text or debug info. Can either be demo or debug
   models:
     version: 0       # Sentiment analysis model version. Can either be 0 or 1
     threshold: 0.66  # Threshold to consider a label neutral

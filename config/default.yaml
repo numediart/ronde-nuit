@@ -1,12 +1,17 @@
 ---
   colors:
     bg: ['#ff5722', '#e64e1f', '#cc461b', '#b33d18', '#993414', '#802c11', '#66230e', '#4d1a0a', '#331107', '#190903']
-    fg: '#fff'
+    fg: '#fff'      # Color of the text if displayed
+  manager:
+    steps: 100      # Number of steps between 2 sentences / sequences
+    transition: 10  # Time transition between all steps
+    toLoop: False   # Loop over received information
   display:
-    steps: 1000
-    transition: 10
-    showText: False
-    printText: False
-    toLoop: False
+    colors: True    # Weither to show the colors
+    text: False     # Show text on top of colors
+  print:         
+    text: False     # Print text in the command line
+    mode: "demo"    # Print text or debug info. Can either be demo or debug
   models:
-    version: 0
+    version: 0      # Sentiment analysis model version. Can either be 0 or 1
+    threshold: 0.66 # Threshold to consider a label neutral

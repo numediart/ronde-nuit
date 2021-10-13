@@ -82,7 +82,7 @@ class ColorManager():
     def colorRange(self,
                    cstart: str,
                    cend: str,
-                   step: int = 100):
+                   steps: int = 100):
         """Compute a range between to colors.
 
         Args
@@ -91,7 +91,7 @@ class ColorManager():
             starting color
         cend : str
             ending color
-        step : int, optional
+        steps : int, optional
             number of colors on the range.
             Default is 100.
 
@@ -103,19 +103,20 @@ class ColorManager():
         objColorStart = Color(cstart)
         objColorEnd = Color(cend)
 
-        for elem in list(objColorStart.range_to(objColorEnd, step)):
+        for elem in list(objColorStart.range_to(objColorEnd, steps)):
             yield elem
 
 
 class AbstractMsgManager():
     def __init__(self,
                  config: Dict):
-        self.analyzer = SentimentAnalyzer(config['models']['version'])
+        self.analyzer = SentimentAnalyzer(
+            config['models']['version'], config['models']['threshold'])
         self.stack: List[Any] = []
 
         self.colors = ColorManager(config['colors'])
-        self.steps = config['display']['steps']
-        self.transition = config['display']['transition']
+        self.steps = config['manager']['steps']
+        self.transition = config['manager']['transition']
 
         self.data: List[Any] = []
         self.previous = None

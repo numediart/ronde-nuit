@@ -19,9 +19,7 @@ class AbstractRonde():
                  parent: Optional[Misc] = None,
                  url: str = ''):
         # Time to wait between actions
-        self.transition = config['display']['transition']
-        # Weither text is shown
-        self.showText = config['display']['showText']
+        self.config = config
 
         # Data extracted from a JSON file
         self.data: List[Any] = []
@@ -129,15 +127,16 @@ class RondeColor(AbstractRonde):
         '''Update the text with the next message and the background with color corresponding to message sentiment.
         '''
         if self.manager.has_data():
-            _, fg, bg, _, _ = self.manager.next_data()
+            msg, fg, bg, label, score = self.manager.next_data()
 
             # Update color
-            self.label.configure(text='')
-            self.update_color(fg, bg)
-            self.root.after(self.manager.transition, self.update)
+            self.update_text(msg, label, score)
+
+            if self.config['display']['colors']:
+                self.update_color(fg, bg)
         else:
             self.manager.parse_data(self.url)
-            self.root.after(self.manager.transition, self.update)
+        self.wait()
 
     def update_color(self, fg, bg):
         """
@@ -145,6 +144,36 @@ class RondeColor(AbstractRonde):
         self.frame.configure(background=bg)
         self.label.configure(background=bg)
         self.label.configure(foreground=fg)
+
+    def update_text(self, msg, label, score):
+        """Update the text.
+
+        Args
+        ----
+        msg : str
+            message to write
+        label : str
+            label of the corresponding message
+        score : float
+            related score
+        """
+        if self.config['display']['text']:
+            self.label.configure(text=msg)
+
+        if self.config['print']['text']:
+            if self.config['print']['mode'] == 'demo':
+                print(msg)
+            elif self.config['print']['mode'] == 'debug':
+                print(
+                    f"#### Sequence: {msg} ---- Label: {label} ---- Score: {score}####")
+
+    def wait(self):
+        """Make the process wait.
+        """
+        if self.root:
+            self.root.after(self.manager.transition, self.update)
+        else:
+            time.sleep(self.manager.transition/1000)
 
     def openfile(self):
         '''Opens a file and store data. Calls update afterward.

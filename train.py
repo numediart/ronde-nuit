@@ -1,4 +1,4 @@
-'''File used to test analysis sentiment in files.
+'''File used to retrain a sentiment analysis model.
 '''
 import argparse
 
@@ -10,15 +10,17 @@ def main():
     '''
     parser = argparse.ArgumentParser(
         description='Retrain a model.')
-    parser.add_argument('-f', '--folder', type=str,
-                        default='data/sorted/',
+    parser.add_argument('folder', type=str,
                         help='path to folder containing data.')
-    parser.add_argument('-m', '--model', type=str,
-                        default='distilbert-base-uncased',
-                        help='base model to retrain from.')
+    parser.add_argument('-t', '--token', type=str,
+                        default='camembert-base',
+                        help='model for tokenisation.')
+    parser.add_argument('-s', '--sentiment', type=str,
+                        default='tblard/tf-allocine',
+                        help='sentiment analysis model to retrain from.')
     args = parser.parse_args()
 
-    retrain(args.model, args.folder)
+    retrain(args.folder, args.token, args.sentiment)
 
 
 if __name__ == '__main__':

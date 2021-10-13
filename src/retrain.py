@@ -11,14 +11,35 @@ from .dataset import create_splits
 
 
 def compute_metrics(eval_pred):
-    metrics_dict = {}
-    predictions, labels = eval_pred
+    """Metric used for prediction.
+    """
+    predictions, _ = eval_pred
     predictions = np.argmax(predictions, axis=1)
+    return predictions
 
 
-def retrain(folder='data/sorted',
+def retrain(folder,
             token_model='camembert-base',
             sentiment_model='tblard/tf-allocine'):
+    '''Retrain a sentiment analysis model.
+
+    Args
+    ----
+    folder : str
+        folder to containing data to retrain from.
+        Folder should contain 2 csv files named train.csv (for training) and test.csv (for testing).
+    token_model : str, optional
+        Model used for tokenisation. It should be a pretrained from CamembertTokenizerFast class.
+        Default is 'camembert-base'.
+    sentiment_model : str, optional
+        Model used for retraining. It should be a pretrained from TFCamembertForSequenceClassification. 
+        Default is 'tblard/tf-allocine'.
+
+    Returns
+    -------
+    TFTrainer
+        trained model. Model is also saved in results folder.
+    '''
 
     train_texts, train_labels = create_splits(
         os.path.join(folder, 'train.csv'))
@@ -49,7 +70,7 @@ def retrain(folder='data/sorted',
 
     training_args = TFTrainingArguments(
         output_dir='./results',          # output directory
-        num_train_epochs=100,            # total number of training epochs
+        num_train_epochs=50,             # total number of training epochs
         per_device_train_batch_size=16,  # batch size per device during training
         per_device_eval_batch_size=64,   # batch size for evaluation
         warmup_steps=50,                 # number of warmup steps for learning rate scheduler
