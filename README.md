@@ -19,7 +19,12 @@ We will explain here the different scripts that can be used and how to use them.
   * *convert2csv.py*
   * *ronde.py*
 
-**WhatsApp Chat conversion**
+**Data collection from website or IRC**
+
+
+**File conversion to CSV**
+
+
 
 > The file used is *extract_msg.py*.
 > 
@@ -86,7 +91,8 @@ We will explain here the different scripts that can be used and how to use them.
 > ```
 > python ronde.py
 > ```
-
+> 
+> This 
 ## Colaboratory
 
 Colaboratory is an online tool to run python code. This do not require any local installation and can even train model on GPUs. The tool will open on the browser through this [link](https://colab.research.google.com/github/numediart/ronde-nuit/blob/master/ronde_nuit.ipynb).

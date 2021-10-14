@@ -1,8 +1,8 @@
-'''Converts JSON to CSV file.
+'''Create a dataset for retraining purpose.
 '''
 import argparse
 
-from src.format import json2csv
+from src.dataset import create_splits
 
 
 def parse_args():
@@ -28,5 +28,3 @@ def parse_args():
 if __name__ == '__main__':
     # Load parameters
     opt = parse_args()
-
-    json2csv(opt.path, opt.csv)

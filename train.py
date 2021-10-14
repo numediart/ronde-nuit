@@ -5,8 +5,13 @@ import argparse
 from src.retrain import retrain
 
 
-def main():
-    '''Main function used to parse command line arguments.
+def parse_args():
+    '''Define an argument parser and returns the corresponding dictionary.
+
+    Returns
+    -------
+    dict
+        dictionary of input arguments
     '''
     parser = argparse.ArgumentParser(
         description='Retrain a model.')
@@ -18,10 +23,13 @@ def main():
     parser.add_argument('-s', '--sentiment', type=str,
                         default='tblard/tf-allocine',
                         help='sentiment analysis model to retrain from.')
-    args = parser.parse_args()
+    opt = parser.parse_args()
 
-    retrain(args.folder, args.token, args.sentiment)
+    return opt
 
 
 if __name__ == '__main__':
-    main()
+    # Load parameters
+    opt = parse_args()
+
+    retrain(opt.folder, opt.token, opt.sentiment)

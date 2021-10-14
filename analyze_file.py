@@ -5,21 +5,31 @@ import argparse
 from src.analysis import analyze_file
 
 
-def main():
-    '''Main function used to parse command line arguments.
+def parse_args():
+    '''Define an argument parser and returns the corresponding dictionary.
+
+    Returns
+    -------
+    dict
+        dictionary of input arguments
     '''
     parser = argparse.ArgumentParser(
         description='Run sentiment analysis using transformers library.')
     parser.add_argument('srcfile', type=str,
                         help='input file to be analyzed.')
-    parser.add_argument('-v', '--version', type=int, default=0,
+    parser.add_argument('-v', '--version', type=int,
+                        default=0,
                         help='version of analyzer. 0 is CamemBERT, 1 is transformers\' default.')
-    parser.add_argument('-t', '--threshold', type=float, default=0.6666,
+    parser.add_argument('-t', '--threshold', type=float,
+                        default=0.6666,
                         help='threshold for neutral label. Any score below the threshold (positive or negative) is considered neutral.')
-    args = parser.parse_args()
+    opt = parser.parse_args()
 
-    analyze_file(args.srcfile, args.version, args.threshold)
+    return opt
 
 
 if __name__ == '__main__':
-    main()
+    # Load parameters
+    opt = parse_args()
+
+    analyze_file(opt.srcfile, opt.version, opt.threshold)
