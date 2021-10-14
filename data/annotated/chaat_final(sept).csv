@@ -1,4 +1,4 @@
-channel;sequence;default label;default score;camembert label;camembert score;label
+channel;message;default label;default score;camembert label;camembert score;label
 #accueil;LM et toi;NEGATIVE;0,7139;NEUTRAL;0,5461;NEUTRAL
 #accueil;Mince ma joiee;POSITIVE;0,9669;NEGATIVE;0,921;POSITIVE
 #accueil;"FaeL:  exactement mon sac a dos  est bien rempi   ;)";NEGATIVE;0,9131;POSITIVE;0,7437;POSITIVE

@@ -1,4 +1,4 @@
-sequence;camembert label;camembert score;label;
+message;camembert label;camembert score;label;
 "Sevran";neutral;0,519093871116638;neutral;
 "Back to the Future";positive;0,835346043109894;positive;
 "Je n'ai aucune peine";neutral;0,539713263511658;negative;
