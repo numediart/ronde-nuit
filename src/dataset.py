@@ -121,3 +121,27 @@ def create_dataset(infolder: str,
         get_statistics(data)
 
     create_csv_splits(data, outfolder, test_ratio)
+
+
+def get_split(path):
+    '''Get a split from a CSV file.
+
+    Args
+    ----
+    path : str
+        path to the CSV file
+
+    Returns
+    -------
+    tuple of pd.DataFrame
+        text and label of the split
+    '''
+    texts = []
+    labels = []
+
+    data = pd.read_csv(path)
+    data.loc[data['label'] != 'neutral']
+    texts = data['sequence'].to_list()
+    labels = [0 if x == 'negative' else 1 for x in data['label'].to_list()]
+
+    return texts, labels

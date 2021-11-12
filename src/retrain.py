@@ -7,7 +7,7 @@ from transformers import (CamembertTokenizerFast,
                           TFCamembertForSequenceClassification, TFTrainer,
                           TFTrainingArguments)
 
-from .dataset import create_splits
+from .dataset import get_split
 
 
 def compute_metrics(eval_pred):
@@ -41,10 +41,7 @@ def retrain(folder,
         trained model. Model is also saved in results folder.
     '''
 
-    train_texts, train_labels = create_splits(
-        os.path.join(folder, 'train.csv'))
-    test_texts, test_labels = create_splits(
-        os.path.join(folder, 'test.csv'))
+    train_texts, train_labels = get_split(os.path.join(folder, 'train.csv'))
 
     train_texts, val_texts, train_labels, val_labels = train_test_split(
         train_texts, train_labels, test_size=.2)
@@ -53,7 +50,6 @@ def retrain(folder,
 
     train_encodings = tokenizer(train_texts, truncation=True, padding=True)
     val_encodings = tokenizer(val_texts, truncation=True, padding=True)
-    test_encodings = tokenizer(test_texts, truncation=True, padding=True)
 
     train_dataset = tf.data.Dataset.from_tensor_slices((
         dict(train_encodings),
@@ -62,10 +58,6 @@ def retrain(folder,
     val_dataset = tf.data.Dataset.from_tensor_slices((
         dict(val_encodings),
         val_labels
-    ))
-    test_dataset = tf.data.Dataset.from_tensor_slices((
-        dict(test_encodings),
-        test_labels
     ))
 
     training_args = TFTrainingArguments(
