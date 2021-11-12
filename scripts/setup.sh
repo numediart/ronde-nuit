@@ -1,9 +1,13 @@
+## Sources :
+## https://www.anegron.site/2020/06/18/how-to-install-conda-and-docker-on-your-raspberry-pi/
+
 # Install general packages
 sudo apt update
 sudo apt upgrade -y
-sudo apt install -y git python3.9 python3-pip
+sudo apt install -y net-tools openssh-server git python3.9 python3-pip
 sudo apt autoclean -y
 sudo apt autoremove -y
+
 
 # Get project repository
 cd ~/Desktop/
