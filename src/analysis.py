@@ -1,7 +1,7 @@
 '''File used to run transformer's library on different files.
 '''
 import json
-from typing import Tuple
+from typing import List, Tuple
 
 from tqdm import tqdm
 from transformers import (AutoTokenizer, TFAutoModelForSequenceClassification,
@@ -9,9 +9,28 @@ from transformers import (AutoTokenizer, TFAutoModelForSequenceClassification,
 
 
 class SentimentAnalyzer():
+    '''Sentiment analysis class.
+
+    Attributes
+    ----------
+    version : int
+        version used for the sentiment analyzer:
+            0 is for camembert trained on allocine dataset.
+            1 is for transformer's default sentiment analysis model.*
+    name : str
+        printable name of the model
+    threshold : float
+        Score's threshold for neutral label. Any score below threshold will imply
+        'neutral' as a label.
+    nlp : Model
+        the actual sentiment analysis model
+    '''
+
     def __init__(self,
                  version: int = 0,
-                 threshold: float = 0.6666):
+                 threshold: float = 0.6666) -> None:
+        '''Initialization
+        '''
         self.version = version
         self.threshold = threshold
         self.select_model()
@@ -47,7 +66,8 @@ class SentimentAnalyzer():
             self.name = 'default'
             self.nlp = pipeline("sentiment-analysis")
 
-    def analyze(self, msg: str) -> Tuple[float, str]:
+    def analyze(self,
+                msg: str) -> Tuple[float, str]:
         '''Runs a sentiment-analysis pipeline on a json file.
 
         Args
@@ -75,7 +95,7 @@ class SentimentAnalyzer():
 
 def analyze_file(srcfile: str,
                  version: int = 0,
-                 threshold: float = 0.6666):
+                 threshold: float = 0.6666) -> None:
     '''Analyze a messages in a JSON file.
 
     Args
@@ -106,7 +126,7 @@ def analyze_file(srcfile: str,
 
 
 def get_tokens(sentence,
-               model="tblard/tf-allocine"):
+               model="tblard/tf-allocine") -> List[str]:
     '''Returns token of a given sentence using specific model.
 
     Args

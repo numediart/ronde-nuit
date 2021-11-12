@@ -121,65 +121,6 @@ def convert_whatsapp_chat(srcfile: str,
         json.dump(data, f, indent=4)
 
 
-# --------- #
-# Text file #
-# --------- #
-def read_txt_file(path: str,
-                  length: int = -1) -> List[Dict[str, str]]:
-    '''Parse txt file.
-
-    Args
-    ----
-    path : str
-        path to txt file
-    length : optional, int
-        number of messages to extract. If -1, extract all messages.
-        Default is -1.
-
-    Returns
-    -------
-    list of dictionary
-        list of messages structured as dictionary.
-    '''
-    result = []
-    msgs = []
-    with open(path, 'r', encoding='utf8') as f:
-        line = f.readline()
-
-        while line and length:
-            if line and line not in msgs:
-                result.append({'message': line})
-                msgs.append(line)
-                length -= 1
-
-            line = f.readline()
-
-    return result
-
-
-def convert_txt_file(scrfile: str,
-                     outfile: str,
-                     length: int = -1) -> None:
-    '''Convert txt file to JSON file.
-
-    Each line of the txt line is a new sentence.
-
-    Args
-    ----
-    srcfile : str
-        path to txt file
-    outfile : str
-        JSON file to extract sentences to
-    length : optional, int
-        number of messages to extract. If -1, extract all messages.
-        Default is -1.
-    '''
-    data = read_txt_file(scrfile, length)
-
-    with open(outfile, 'w') as f:
-        json.dump(data, f, indent=4)
-
-
 # ---- #
 # HTML #
 # ---- #

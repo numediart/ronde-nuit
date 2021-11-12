@@ -13,35 +13,19 @@ This project contains several codes used for :
 ## How To
 
 We will explain here the different scripts that can be used and how to use them. The available scripts are:
-  * *extract_msg.py*
   * *irc_connection.py*
-  * *analyze_file.py*
+  * *online_read.py*
   * *convert2csv.py*
+  * *train.py*
+  * *analyze_file.py*
   * *ronde.py*
 
 **Data collection from website or IRC**
 
+First programs are used to extract messages / sentences from IRC or an online txt file.
+We use 2 programs here:
+  * **irc_connection.py** is used to connect to an IRC chat and save any message read from it.
 
-**File conversion to CSV**
-
-
-
-> The file used is *extract_msg.py*.
-> 
-> This command will convert the txt WhatsApp chat history file to JSON, extracting the 5000 first messages:
-> ``` 
-> python extract_msg.py 'data/whatsapp_famille.txt' 'data/whatsapp_5000.json' -l 5000
-> ```
-> 
-> We can also extract all messages as follow:
-> ``` 
-> python extract_msg.py 'data/whatsapp_famille.txt' 'data/whatsapp.json'
-> ```
-
-**IRC message gathering**
-
-> The file used is *irc_connection.py*.
-> 
 > We can use the default configuration for extraction:
 > ``` 
 > python irc_connection.py
@@ -54,24 +38,24 @@ We will explain here the different scripts that can be used and how to use them.
 > 
 > Multiple channels can be given at once. Output JSON file will have a 'channel' value with the channel tag.
 
-**Run transformers' sentiment analysis**
+  * **online_read.py** is used to get information from an online txt file.
 
-> The file used is *analyze_file.py*.
-> 
-> We can use the default sentiment analysis in transformers:
-> ``` 
-> python analyze_file.py 'data/whatsapp_500.json' -v 1
+> We need to define the url of the online txt file.
+> ```
+> python online_read.py 'http://someurl.com/myfile.txt'
 > ```
 > 
-> Or use the default behavior, which is based on CamemBERT model (for French language):
-> ``` 
-> python analyze_file.py 'data/whatsapp_500.json'
+> We can also define the JSON file in which the sentences will be stored.
 > ```
+> python online_read.py 'http://someurl.com/myfile.txt' -f 'output.json'
+> ``` 
 
-**Convert JSON to CSV files**
+**File conversion to CSV**
 
-> The file used is *convert2csv.py*.
-> 
+Extraction methods create JSON files. They need to be converted to CSV file for annotation.
+
+We use *convert2csv.py* file for this purpose.
+
 > Message extraction creates a JSON file. We use this function to convert JSON output to CSV file.
 > 
 > We can use the script with default parameters:
@@ -84,15 +68,48 @@ We will explain here the different scripts that can be used and how to use them.
 > python convert2csv.py 'data/whatsapp_500.json' -c 'data/whatsapp_500.csv' -m 'default' 'camembert'
 > ```
 
+**Retraining the model**
+
+Once the annotation is done, we can proceed to the training of our model.
+
+**/!\ IMPORTANT: CSV columns used for retraining should be called 'message' (for the input text) and 'label' (for the corresponding sentiment).** 
+
+We use *train.py* file for the retraining.
+
+> We need to define the folder where our data is stored. The folder may contain multiple csv file. Be careful as they all will be used for training.
+> ```
+> python train.py 'data/sorted/'
+> ```
+> 
+> Retraining requires a tokenisation model and a sentiment analysis model. Those can be modified as a parameter.
+> ```
+> python train.py 'data/sorted/' -t camembert-base -s 'tblard/tf-allocine'
+
+**Run transformers' sentiment analysis**
+
+We can now use our model for sentiment analysis. This is based on *analyze_file.py*.
+
+> We can use the default sentiment analysis in transformers:
+> ``` 
+> python analyze_file.py 'data/whatsapp_500.json' -v 1
+> ```
+> 
+> Or use the default behavior, which is based on CamemBERT model (for French language):
+> ``` 
+> python analyze_file.py 'data/whatsapp_500.json'
+> ```
+
 **Run GUI**
 
-> Simply use *ronde.py*.
-> 
+The GUI behavior depends on the YAML configuration file. The script used is *ronde.py*.
+
 > ```
 > python ronde.py
 > ```
 > 
-> This 
+> You can modify the configuration file used for the GUI. You can also define a file or website to base the GUI on.
+> ```
+> python ronde.py -c 'config/default.yaml' -f 'https://nightwatch.couzinetjacques.com/ReqMsg_01.php'
 ## Colaboratory
 
 Colaboratory is an online tool to run python code. This do not require any local installation and can even train model on GPUs. The tool will open on the browser through this [link](https://colab.research.google.com/github/numediart/ronde-nuit/blob/master/ronde_nuit.ipynb).
