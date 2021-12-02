@@ -6,6 +6,9 @@ import tkinter as tk
 from tkinter import Misc, filedialog, ttk
 from typing import Any, Dict, List, Optional
 
+from pythonosc import udp_client
+import mido
+
 import yaml
 from transformers import logging
 
@@ -36,6 +39,14 @@ class RondeGUI():
 
         if self.root:
             self.create_window()
+
+        self.osc_clients, self.midi_outports = [], []
+        for ip, port in zip( config[ 'osc' ][ 'ip' ], config[ 'osc' ][ 'port' ] ) : 
+            client = udp_client.SimpleUDPClient( ip, port )
+            self.osc_clients.append( client) 
+            
+        #for port in config[ 'midi' ][ 'port' ] :
+            #self.midi_outports.append( mido.open_output() )
 
     def create_window(self):
         # Frame containing the text and a selection button (for the messages and their labels)
@@ -81,6 +92,7 @@ class RondeGUI():
         if self.manager.has_messages():
             msg, fg, bg, label, score = self.manager.next_data()
 
+            self.sendOut( label, score )
             # Update color
             self.update_text(msg, label, score)
 
@@ -136,6 +148,24 @@ class RondeGUI():
         else:
             while(1):
                 self.update()
+
+    def sendOut( self, label, score ) :
+        '''
+        Send out throught OSC and MIDI label and score outputted from model
+        '''
+        print( self.osc_clients, label )
+        for client in self.osc_clients : 
+            client.send_message( "/label", label )
+            client.send_message( "/score", score )
+
+        if( label == 'positive') : 
+            value = 127
+        elif( label == 'negative' ) :
+            value = 0
+        elif( label == 'neutral' ) :
+            value = 63
+
+        #self.midi_outport.send( 'control_change', control = self.config[ 'midi' ][ 'label_cc_nb' ], value = 127 )
 
 
 def set_verbosity(config: Dict):
