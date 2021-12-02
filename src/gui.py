@@ -42,11 +42,11 @@ class RondeGUI():
 
         self.osc_clients, self.midi_outports = [], []
         for ip, port in zip( config[ 'osc' ][ 'ip' ], config[ 'osc' ][ 'port' ] ) : 
-            client = udp_client.SimpleUDPClient( ip, port )
-            self.osc_clients.append( client) 
+            self.osc_clients.append( udp_client.SimpleUDPClient( ip, port ) ) 
             
-        #for port in config[ 'midi' ][ 'port' ] :
-            #self.midi_outports.append( mido.open_output() )
+        for port in range( config[ 'midi' ][ 'nb_port' ] ) :
+            self.midi_outports.append( mido.open_output() )
+        
 
     def create_window(self):
         # Frame containing the text and a selection button (for the messages and their labels)
@@ -151,9 +151,15 @@ class RondeGUI():
 
     def sendOut( self, label, score ) :
         '''
-        Send out throught OSC and MIDI label and score outputted from model
+        Send out throught OSC and MIDI label and score outputted from model.
+        OSC sent data are /label and /score.
+        Midi data are sent as control change Midi messages whose numnber is define in the config file. 
+        There three cc number : one for the label (0 : negative, 63 : neutral, 127 : positive), one for the whole part of the score as a percentage 
+        and one for the frac part of the percentage
         '''
-        print( self.osc_clients, label )
+        score_whole , score_frac = self.splitScoreAsInts( score ) 
+
+        ## OSC sends
         for client in self.osc_clients : 
             client.send_message( "/label", label )
             client.send_message( "/score", score )
@@ -165,8 +171,27 @@ class RondeGUI():
         elif( label == 'neutral' ) :
             value = 63
 
-        #self.midi_outport.send( 'control_change', control = self.config[ 'midi' ][ 'label_cc_nb' ], value = 127 )
+        for midi_port in self.midi_outports :
+            label_msg = mido.Message( 'control_change', control = self.config[ 'midi' ][ 'label_cc_nb' ], value = value )
+            score_whole_msg = mido.Message( 'control_change', control = self.config[ 'midi' ][ 'score_int_cc_nb' ], value = score_whole )   
+            score_frac_msg = mido.Message( 'control_change', control = self.config[ 'midi' ][ 'score_float_cc_nb' ], value = score_frac )   
+            midi_port.send( label_msg )
+            midi_port.send( score_whole_msg )
+            midi_port.send( score_frac_msg )
+        #score_int_cc_nb score_float_cc_nb
 
+    def splitScoreAsInts( self, score ) :
+        '''
+        Rough function which splits the score taken as a percentage (between 0 and 100) into two ints representinf the whole 
+        and the frac part of the percentage.
+        These two ints are used to be sent out as two separate midi control change.
+        This function could be refined whith the use of math.modf.
+        '''
+        score = score * 100
+        whole = int( score )
+        frac = int( ( score - whole ) * 100 )
+
+        return whole, frac
 
 def set_verbosity(config: Dict):
     '''Set machine learning models verbosity.

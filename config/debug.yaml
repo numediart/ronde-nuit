@@ -16,7 +16,7 @@
     version: 0       # Sentiment analysis model version. Can either be 0 or 1
     threshold: 0.66  # Threshold to consider a label neutral
   midi:
-    output_port: 0   # Output port number on which to send midi data
+    nb_port: 1   # Number of Midi output port on which to send midi data
     label_cc_nb: 10  # Control Change number for label value
     score_int_cc_nb: 11 #Control Change number for integer part of score (between 0 and 100)
     score_float_cc_nb: 12 #Control Change number for floating part of score (between 0 and 100)
