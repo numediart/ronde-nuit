@@ -45,7 +45,12 @@ class RondeGUI():
             self.osc_clients.append( udp_client.SimpleUDPClient( ip, port ) ) 
             
         for port in range( config[ 'midi' ][ 'nb_port' ] ) :
-            self.midi_outports.append( mido.open_output() )
+            try :
+                out = mido.open_output( )
+                self.midi_outports.append( out )
+            except OSError :
+                print( 'No output port availble - Receiving apps should be launched first so that output_port() can connect to the created MIDI ports.') 
+
         
 
     def create_window(self):
@@ -100,6 +105,10 @@ class RondeGUI():
                 self.update_color(fg, bg)
         else:
             self.manager.parse_data(self.url)
+            if( self.config[ 'manager' ][ 'last_messages' ] > -1 ) :
+                print( "In update, checking last_messages argument" )
+                self.manager.set_start( self.config[ 'manager' ][ 'last_messages' ] )
+
         self.wait()
 
     def update_text(self, msg, label, score):
@@ -182,9 +191,9 @@ class RondeGUI():
 
     def splitScoreAsInts( self, score ) :
         '''
-        Rough function which splits the score taken as a percentage (between 0 and 100) into two ints representinf the whole 
+        Rough function which splits the score taken as a percentage (between 0 and 100) into two ints representing the whole 
         and the frac part of the percentage.
-        These two ints are used to be sent out as two separate midi control change.
+        These two ints are used to be sent out as two separate midi control change messages.
         This function could be refined whith the use of math.modf.
         '''
         score = score * 100

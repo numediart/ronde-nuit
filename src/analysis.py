@@ -8,6 +8,7 @@ from transformers import (AutoTokenizer, TFAutoModelForSequenceClassification,
                           pipeline)
 
 
+
 class SentimentAnalyzer():
     '''Sentiment analysis class.
 
@@ -113,6 +114,8 @@ def analyze_file(srcfile: str,
     for elem in tqdm(data):
         if 'message' in elem and analyzer.name not in elem:
             score, label = analyzer.analyze(elem['message'])
+##### send OSC and MIDI
+
 
             elem.update({
                 analyzer.name: {
@@ -144,3 +147,4 @@ def get_tokens(sentence,
     tokenizer = AutoTokenizer.from_pretrained(model)
     encoded = tokenizer.encode(sentence)
     return [tokenizer.decode([elem]) for elem in encoded]
+

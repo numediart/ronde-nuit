@@ -203,6 +203,15 @@ class AbstractMsgManager():
         '''
         return any(self.messages)
 
+    def set_start(self, last) -> Optional[Any] :
+        '''Define at which messages from the end the stack should really starts.
+        This function will prevent from displaying all messages but the n last.
+        Prevent from having to go throught all messages before starting to read all of them.
+        '''
+        self.messages = self.messages[ -last: ]
+
+        return None
+
     def next_data(self) -> Optional[Any]:
         '''Get the next message in data stack.
 
@@ -309,5 +318,7 @@ class OnlineMsgManager(AbstractMsgManager):
     def parse_data(self,
                    url: str) -> None:
         r = requests.get(url, allow_redirects=True)
+        print( type( r.text ) )
         self.parser.feed(r.text)
         self.set_messages(self.parser.stack)
+        
