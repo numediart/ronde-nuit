@@ -6,12 +6,21 @@
     steps: 100      # Number of steps between 2 sentences / sequences
     transition: 10  # Time transition between all steps
     toLoop: False   # Loop over received information
+    last_messages : 4 # Nb of previsous sessions messages to show. If -1 show all.
   display:
     colors: True    # Weither to show the colors
     text: False     # Show text on top of colors
   print:         
-    text: False     # Print text in the command line
+    text: True     # Print text in the command line
     mode: "demo"    # Print text or debug info. Can either be demo or debug
   models:
     version: 0      # Sentiment analysis model version. Can either be 0 or 1
     threshold: 0.66 # Threshold to consider a label neutral
+  midi:
+    nb_port: 1   # Number of Midi output port on which to send midi data
+    label_cc_nb: 10  # Control Change number for label value
+    score_int_cc_nb: 11 #Control Change number for integer part of score (between 0 and 100)
+    score_float_cc_nb: 12 #Control Change number for floating part of score (between 0 and 100)
+  osc:
+    ip: [ '127.0.0.1' ] # ip adresses of receiving hosts
+    port: [ 5000 ]   # udp port on which the host will listen to

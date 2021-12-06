@@ -88,6 +88,9 @@ class RondeGUI():
 
         self.manager.parse_data(self.url)
 
+        if( self.config[ 'manager' ][ 'last_messages' ] > -1 ) :
+            self.manager.set_start( self.config[ 'manager' ][ 'last_messages' ] )
+
         self.button.pack_forget()
         self.root.after(100, self.update)
 
@@ -104,10 +107,10 @@ class RondeGUI():
             if self.config['display']['colors']:
                 self.update_color(fg, bg)
         else:
-            self.manager.parse_data(self.url)
-            if( self.config[ 'manager' ][ 'last_messages' ] > -1 ) :
-                print( "In update, checking last_messages argument" )
-                self.manager.set_start( self.config[ 'manager' ][ 'last_messages' ] )
+            if( self.config[ 'manager' ][ 'toLoop' ] ) :
+                self.manager.parse_data(self.url)
+                if( self.config[ 'manager' ][ 'last_messages' ] > -1 ) :
+                    self.manager.set_start( self.config[ 'manager' ][ 'last_messages' ] )
 
         self.wait()
 
@@ -152,6 +155,11 @@ class RondeGUI():
             time.sleep(self.config['manager']['transition']/1000)
 
     def mainloop(self):
+        
+        self.manager.parse_data(self.url)
+        if( self.config[ 'manager' ][ 'last_messages' ] > -1 ) :
+            self.manager.set_start( self.config[ 'manager' ][ 'last_messages' ] )
+
         if self.root:
             self.root.mainloop()
         else:
