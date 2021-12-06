@@ -6,7 +6,7 @@
     steps: 0         # Number of steps between 2 sentences / sequences
     transition: 1000 # Time transition between all steps
     toLoop: True     # Loop over received information
-    last_messages : 4 # Nb of previsous sessions messages to show. If -1 show all.
+    last_messages : -1 # Nb of previsous sessions messages to show. If -1 show all.
   display:
     colors: False    # Weither to show the colors
     text: False      # Show text on top of colors
