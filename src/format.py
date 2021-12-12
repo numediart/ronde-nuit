@@ -143,6 +143,7 @@ class RondeHTML(HTMLParser):
         self.row = 0
         self.to_write = False
         self.stack: List[str] = []
+        self.pseudo_stack: List[str] = []
         self.loop = loop
 
     def handle_starttag(self, tag, attrs):
@@ -168,6 +169,8 @@ class RondeHTML(HTMLParser):
                 self.to_write = True
             else:
                 self.to_write = True
+        if self.col == 2 and self.to_write:
+            self.pseudo_stack.append(str(data))
         if self.col == 3 and self.to_write:
             self.stack.append(str(data))
             if not self.loop:

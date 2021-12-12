@@ -32,9 +32,15 @@ class RondeGUI():
 
         # colors to show
         self.url = url
+        print('#########')
+        print( url )
+        print('#########')
+
         if self.url == '' or os.path.isfile(self.url):
+            print( '######## JSON MANAGER ########')
             self.manager: AbstractMsgManager = JsonMsgManager(config)
         else:
+            print( '######## ONLINE MANAGER ########')
             self.manager = OnlineMsgManager(config)
 
         if self.root:

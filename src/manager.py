@@ -318,5 +318,11 @@ class OnlineMsgManager(AbstractMsgManager):
                    url: str) -> None:
         r = requests.get(url, allow_redirects=True)
         self.parser.feed(r.text)
+        #print( '####### PRINT STACK ##########')
+        #print( self.parser.stack )
+        #print( '####### END STACK ##########')
+        print( '####### PRINT PSEUDO STACK ##########')
+        print( self.parser.pseudo_stack )
+        print( '####### END PSEUDO STACK ##########')
         self.set_messages(self.parser.stack)
         
