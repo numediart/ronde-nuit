@@ -104,11 +104,11 @@ class RondeGUI():
         '''Update the text with the next message and the background with color corresponding to message sentiment.
         '''
         if self.manager.has_messages():
-            msg, fg, bg, label, score = self.manager.next_data()
+            msg, pseudo, fg, bg, label, score = self.manager.next_data()
 
             self.sendOut( label, score )
             # Update color
-            self.update_text(msg, label, score)
+            self.update_text(msg, pseudo, label, score)
 
             if self.config['display']['colors']:
                 self.update_color(fg, bg)
@@ -120,13 +120,15 @@ class RondeGUI():
 
         self.wait()
 
-    def update_text(self, msg, label, score):
+    def update_text(self, msg, pseudo, label, score):
         """Update the text.
 
         Args
         ----
         msg : str
             message to write
+        pseudo : str
+            Pseudo related to the message
         label : str
             label of the corresponding message
         score : float
@@ -134,16 +136,16 @@ class RondeGUI():
         """
         if self.root:
             if self.config['display']['text']:
-                self.label.configure(text=msg)
+                self.label.configure(text = pseudo + ' : '+ msg)
             else:
                 self.label.configure(text='')
 
         if self.config['print']['text']:
             if self.config['print']['mode'] == 'demo':
-                print(msg)
+                print(pseudo, ' : ' , msg)
             elif self.config['print']['mode'] == 'debug':
                 print(
-                    f"#### Sequence: {msg} ---- Label: {label} ---- Score: {score}####")
+                    f"#### Pseudo: {pseudo} ---- Sequence: {msg} ---- Label: {label} ---- Score: {score}####")
 
     def update_color(self, fg, bg):
         """

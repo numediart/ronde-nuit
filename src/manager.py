@@ -180,6 +180,7 @@ class AbstractMsgManager():
         self.steps = config['manager']['steps']
 
         self.messages: List[Any] = []
+        self.pseudos: List[Any] = []
         self.previous = None
 
     def set_messages(self,
@@ -192,6 +193,22 @@ class AbstractMsgManager():
             list of messages to set in the stack
         '''
         self.messages = messages.copy()
+    
+
+    def set_messages_and_pseudos(self,
+                     messages: List[str],
+                     pseudos:List[str] ) -> None:
+        '''Set the list of messages.
+
+        Args
+        ----
+        messages : list of str
+            list of messages to set in the stack
+        pseudos : list of str
+            list of pseudos to set in the stack
+        '''
+        self.messages = messages.copy()
+        self.pseudos = pseudos.copy()
 
     def has_messages(self) -> bool:
         '''Returns if data has a message to be read.
@@ -209,6 +226,7 @@ class AbstractMsgManager():
         Prevent from having to go throught all messages before starting to read all of them.
         '''
         self.messages = self.messages[ -last: ]
+        self.pseudos = self.pseudos[ -last: ]
 
 
     def next_data(self) -> Optional[Any]:
@@ -239,6 +257,7 @@ class AbstractMsgManager():
           - add new info to the stack
         '''
         msg = self.get_next_msg()
+        pseudo = self.get_next_pseudo()
 
         score, label = self.analyzer.analyze(msg)
 
@@ -252,7 +271,7 @@ class AbstractMsgManager():
                 self.stack.append(
                     (pmsg, ifg, ibg, plab, psco))
 
-        self.stack.append((msg, fg, bg, label, score))
+        self.stack.append((msg, pseudo, fg, bg, label, score))
 
     def get_next_msg(self) -> str:
         '''Collect and format the next message read.
@@ -264,6 +283,17 @@ class AbstractMsgManager():
         '''
         msg = remove_irc_formatting(self.messages.pop(0))
         return ftfy.ftfy(msg)
+
+    def get_next_pseudo(self) -> str:
+        '''Collect and format the next pseudo.
+
+        Returns
+        -------
+        str
+            formatted next pseudo to handle
+        '''
+        pseudo = remove_irc_formatting(self.pseudos.pop(0))
+        return ftfy.ftfy(pseudo)
 
     @abc.abstractmethod
     def parse_data(self,
@@ -318,11 +348,6 @@ class OnlineMsgManager(AbstractMsgManager):
                    url: str) -> None:
         r = requests.get(url, allow_redirects=True)
         self.parser.feed(r.text)
-        #print( '####### PRINT STACK ##########')
-        #print( self.parser.stack )
-        #print( '####### END STACK ##########')
-        print( '####### PRINT PSEUDO STACK ##########')
-        print( self.parser.pseudo_stack )
-        print( '####### END PSEUDO STACK ##########')
-        self.set_messages(self.parser.stack)
+        #self.set_messages(self.parser.stack)
+        self.set_messages_and_pseudos(self.parser.stack, self.parser.pseudo_stack)
         
