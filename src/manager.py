@@ -207,8 +207,16 @@ class AbstractMsgManager():
         pseudos : list of str
             list of pseudos to set in the stack
         '''
-        self.messages = messages.copy()
-        self.pseudos = pseudos.copy()
+        # init the different stacks
+        if( len( self.messages ) == 0 and len( self.pseudos ) ==0 ) :
+            self.messages = messages.copy()
+            self.pseudos = pseudos.copy()
+        else : # Update stacks with incoming if stacks have already been populated
+            difference_mess = list( set( messages ) - set( self.messages ) )
+            difference_pseudos = list( set( pseudos ) - set( self.pseudos ) )
+            for m, p in zip( difference_mess, difference_pseudos ) : 
+                self.messages.append( m )
+                self.pseudos.append( p )
 
     def has_messages(self) -> bool:
         '''Returns if data has a message to be read.
@@ -298,7 +306,7 @@ class AbstractMsgManager():
     @abc.abstractmethod
     def parse_data(self,
                    url: str) -> None:
-        '''This method loads from data from an url.
+        '''This method loads data from an url.
 
         No returns, but messages attribute should be updated with new messages.
 

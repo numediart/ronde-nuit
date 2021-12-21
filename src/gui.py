@@ -172,6 +172,7 @@ class RondeGUI():
             self.root.mainloop()
         else:
             while(1):
+                self.manager.parse_data(self.url)
                 self.update()
 
     def sendOut( self, label, score ) :
