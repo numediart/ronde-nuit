@@ -217,21 +217,25 @@ class AbstractMsgManager():
 
         '''
         # init the different stacks
+        #self.messages, self.pseudos = [], []
+
         if( len( self.messages_memory ) == 0 and len( self.pseudos_memory ) == 0 ) :
-            self.messages = messages.copy()
-            self.pseudos = pseudos.copy()
+            print( 'no memory' )
             self.messages_memory = messages.copy()
             self.pseudos_memory = pseudos.copy()
-        
-            #return None, None
-        
-        else : # Update stacks with incoming messages if stacks have already been populated
-            self.messages = list( set( messages ) - set( self.messages_memory ) )
-            self.pseudos = list( set( pseudos ) - set( self.pseudos_memory ) )
-            for m, p in zip( self.messages, self.pseudos ) : 
+            self.messages = messages.copy()
+            self.pseudos = pseudos.copy()
+            
+
+        if( len( messages ) > len( self.messages_memory ) and len( pseudos ) > len( self.pseudos_memory ) and len( pseudos ) == len( messages ) ) :
+
+            for m, p in zip( messages[ len( self.messages_memory ): ], pseudos[ len( self.pseudos_memory ): ] ) : 
+                
                 self.messages_memory.append( m )
                 self.pseudos_memory.append( p )
-        
+                self.messages.append( m )
+                self.pseudos.append( p )
+    
             #return self.messages, self.pseudos
 
         
@@ -245,6 +249,16 @@ class AbstractMsgManager():
             True if data has any element, False otherwise
         '''
         return any( self.messages )
+
+    def get_nb_of_messages(self) -> int :
+        '''
+        Get the number of messages in self.messages
+        Returns
+        -------
+        int
+            The number of messages remaining in manager.messages
+        '''
+        return len( self.messages )
 
     def set_start(self, last) -> None :
         '''Define at which messages from the end the stack should really starts.
@@ -322,8 +336,11 @@ class AbstractMsgManager():
         str
             formatted next pseudo to handle
         '''
-        pseudo = remove_irc_formatting( self.pseudos.pop( 0 ) )
-        return ftfy.ftfy( pseudo )
+        if( len( self.pseudos ) == 0 ) : 
+            pseudo = 'None'
+        else : 
+            pseudo = self.pseudos.pop( 0 )
+        return ( pseudo )
 
     @abc.abstractmethod
     def parse_data(self,
@@ -377,6 +394,7 @@ class OnlineMsgManager(AbstractMsgManager):
     def parse_data(self,
                    url: str) -> None:
         r = requests.get(url, allow_redirects=True)
+        self.parser.clean()
         self.parser.feed(r.text)
         #self.set_messages(self.parser.stack)
         self.set_messages_and_pseudos(self.parser.stack, self.parser.pseudo_stack)

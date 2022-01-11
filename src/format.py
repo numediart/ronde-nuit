@@ -170,11 +170,23 @@ class RondeHTML(HTMLParser):
             else:
                 self.to_write = True
         if self.col == 2 and self.to_write:
-            self.pseudo_stack.append( str( data ) )
+            # The 2 following conditions are useful to prevent creation of several pseudos when
+            # pseudos are between < and >. It seems to mess up the parser by creating two intermediate pseudos :
+            # one with a blanck space and another one with <
+            if( data != ' ' and data != '<') :
+                if( data[-1] == '>' ) :
+                    self.pseudo_stack.append( '<' + str( data ) )
+                else :
+                    self.pseudo_stack.append( str( data ) )
         if self.col == 3 and self.to_write:
+            #print( 'Data in self.col == 3 <message> ', data )
             self.stack.append( str( data ) )
             if not self.loop:
                 self.to_write = False
+    
+    def clean( self ) :
+        self.stack = []
+        self.pseudo_stack = []
 
 
 # ---------- #

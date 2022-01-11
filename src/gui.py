@@ -107,7 +107,7 @@ class RondeGUI():
         
         if self.manager.has_messages():
             msg, pseudo, fg, bg, label, score = self.manager.next_data()
-
+            print( self.manager.get_nb_of_messages() )
             self.sendOut( label, score )
             # Update color
             self.update_text(msg, pseudo, label, score)
