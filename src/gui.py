@@ -92,8 +92,9 @@ class RondeGUI():
         if self.url == '':
             self.url = filedialog.askopenfilename()
 
+        ## Loop to obtain last messages
+        #while(1):
         self.manager.parse_data(self.url)
-
         if( self.config[ 'manager' ][ 'last_messages' ] > -1 ) :
             self.manager.set_start( self.config[ 'manager' ][ 'last_messages' ] )
 
@@ -103,6 +104,7 @@ class RondeGUI():
     def update(self):
         '''Update the text with the next message and the background with color corresponding to message sentiment.
         '''
+        
         if self.manager.has_messages():
             msg, pseudo, fg, bg, label, score = self.manager.next_data()
 
@@ -113,10 +115,10 @@ class RondeGUI():
             if self.config['display']['colors']:
                 self.update_color(fg, bg)
         else:
-            if( self.config[ 'manager' ][ 'toLoop' ] ) :
-                self.manager.parse_data(self.url)
-                if( self.config[ 'manager' ][ 'last_messages' ] > -1 ) :
-                    self.manager.set_start( self.config[ 'manager' ][ 'last_messages' ] )
+            self.manager.parse_data(self.url)
+            #if( self.config[ 'manager' ][ 'toLoop' ] ) :
+            #    if( self.config[ 'manager' ][ 'last_messages' ] > -1 ) :
+            #        self.manager.set_start( self.config[ 'manager' ][ 'last_messages' ] )
 
         self.wait()
 
@@ -162,18 +164,29 @@ class RondeGUI():
         else:
             time.sleep(self.config['manager']['transition']/1000)
 
+    def getLastMessages( self ) :
+        while( 1 ) :
+            self.manager.parse_data(self.url)
+            if( self.config[ 'manager' ][ 'last_messages' ] > -1 ) :
+                self.manager.set_start( self.config[ 'manager' ][ 'last_messages' ] )
+            
+
     def mainloop(self):
         
-        self.manager.parse_data(self.url)
-        if( self.config[ 'manager' ][ 'last_messages' ] > -1 ) :
-            self.manager.set_start( self.config[ 'manager' ][ 'last_messages' ] )
+        #self.manager.parse_data(self.url)
+        #if( self.config[ 'manager' ][ 'last_messages' ] > -1 ) :
+        #    self.manager.set_start( self.config[ 'manager' ][ 'last_messages' ] )
 
         if self.root:
             self.root.mainloop()
         else:
+            self.manager.parse_data( self.url )
+            if( self.config[ 'manager' ][ 'last_messages' ] > -1 ) :
+                self.manager.set_start( self.config[ 'manager' ][ 'last_messages' ] )
             while(1):
-                self.manager.parse_data(self.url)
                 self.update()
+
+    
 
     def sendOut( self, label, score ) :
         '''

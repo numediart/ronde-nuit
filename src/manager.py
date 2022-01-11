@@ -174,13 +174,16 @@ class AbstractMsgManager():
         '''
         self.analyzer = SentimentAnalyzer(
             config['models']['version'], config['models']['threshold'])
-        self.stack: List[Any] = []
+        self.stack: List[Any] = [] # stack of elements used for display ()
 
         self.colors = ColorManager(config['colors'])
         self.steps = config['manager']['steps']
 
-        self.messages: List[Any] = []
-        self.pseudos: List[Any] = []
+        self.messages_memory: List[Any] = []
+        self.pseudos_memory: List[Any] = []
+        self.messages: List[Any] = [] # New messages from parser
+        self.pseudos: List[Any] = [] # New pseudos from parser
+        self.start_index = -1
         self.previous = None
 
     def set_messages(self,
@@ -197,7 +200,7 @@ class AbstractMsgManager():
 
     def set_messages_and_pseudos(self,
                      messages: List[str],
-                     pseudos:List[str] ) -> None:
+                     pseudos:List[str] ) :
         '''Set the list of messages.
 
         Args
@@ -206,17 +209,32 @@ class AbstractMsgManager():
             list of messages to set in the stack
         pseudos : list of str
             list of pseudos to set in the stack
+        Return
+        ------
+            self.messages or difference_mess : list of str
+
+            self.pseudos or difference_pseudos : list of str
+
         '''
         # init the different stacks
-        if( len( self.messages ) == 0 and len( self.pseudos ) ==0 ) :
+        if( len( self.messages_memory ) == 0 and len( self.pseudos_memory ) == 0 ) :
             self.messages = messages.copy()
             self.pseudos = pseudos.copy()
-        else : # Update stacks with incoming if stacks have already been populated
-            difference_mess = list( set( messages ) - set( self.messages ) )
-            difference_pseudos = list( set( pseudos ) - set( self.pseudos ) )
-            for m, p in zip( difference_mess, difference_pseudos ) : 
-                self.messages.append( m )
-                self.pseudos.append( p )
+            self.messages_memory = messages.copy()
+            self.pseudos_memory = pseudos.copy()
+        
+            #return None, None
+        
+        else : # Update stacks with incoming messages if stacks have already been populated
+            self.messages = list( set( messages ) - set( self.messages_memory ) )
+            self.pseudos = list( set( pseudos ) - set( self.pseudos_memory ) )
+            for m, p in zip( self.messages, self.pseudos ) : 
+                self.messages_memory.append( m )
+                self.pseudos_memory.append( p )
+        
+            #return self.messages, self.pseudos
+
+        
 
     def has_messages(self) -> bool:
         '''Returns if data has a message to be read.
@@ -226,7 +244,7 @@ class AbstractMsgManager():
         bool
             True if data has any element, False otherwise
         '''
-        return any(self.messages)
+        return any( self.messages )
 
     def set_start(self, last) -> None :
         '''Define at which messages from the end the stack should really starts.
@@ -235,6 +253,7 @@ class AbstractMsgManager():
         '''
         self.messages = self.messages[ -last: ]
         self.pseudos = self.pseudos[ -last: ]
+        self.start_index = len( self.messages ) - last
 
 
     def next_data(self) -> Optional[Any]:
@@ -246,12 +265,15 @@ class AbstractMsgManager():
             data related to the next message
         '''
         if not self.stack:
+            #print( 'not self.stack')
             if self.has_messages():
                 self.update_stack()
 
         if self.stack:
+            #print( 'self.stack')
             self.previous = self.stack.pop(0)
             return self.previous
+        
         return None
 
     def update_stack(self) -> None:
@@ -273,15 +295,15 @@ class AbstractMsgManager():
         bg = self.colors.get_next(label, "bg")
 
         if self.previous and self.steps > 0:
-            pmsg, pfg, pbg, plab, psco = self.previous
+            pmsg, ppseudo, pfg, pbg, plab, psco = self.previous
             for ifg, ibg in zip(self.colors.colorRange(pfg, fg, self.steps),
                                 self.colors.colorRange(pbg, bg, self.steps)):
                 self.stack.append(
-                    (pmsg, ifg, ibg, plab, psco))
+                    (pmsg, ppseudo, ifg, ibg, plab, psco))
 
         self.stack.append((msg, pseudo, fg, bg, label, score))
 
-    def get_next_msg(self) -> str:
+    def get_next_msg( self ) -> str:
         '''Collect and format the next message read.
 
         Returns
@@ -289,10 +311,10 @@ class AbstractMsgManager():
         str
             formatted next message to handle
         '''
-        msg = remove_irc_formatting(self.messages.pop(0))
-        return ftfy.ftfy(msg)
+        msg = remove_irc_formatting( self.messages.pop( 0 ) )
+        return ftfy.ftfy( msg )
 
-    def get_next_pseudo(self) -> str:
+    def get_next_pseudo( self ) -> str:
         '''Collect and format the next pseudo.
 
         Returns
@@ -300,8 +322,8 @@ class AbstractMsgManager():
         str
             formatted next pseudo to handle
         '''
-        pseudo = remove_irc_formatting(self.pseudos.pop(0))
-        return ftfy.ftfy(pseudo)
+        pseudo = remove_irc_formatting( self.pseudos.pop( 0 ) )
+        return ftfy.ftfy( pseudo )
 
     @abc.abstractmethod
     def parse_data(self,
@@ -358,4 +380,6 @@ class OnlineMsgManager(AbstractMsgManager):
         self.parser.feed(r.text)
         #self.set_messages(self.parser.stack)
         self.set_messages_and_pseudos(self.parser.stack, self.parser.pseudo_stack)
+        
+
         

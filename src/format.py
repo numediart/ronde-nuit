@@ -170,9 +170,9 @@ class RondeHTML(HTMLParser):
             else:
                 self.to_write = True
         if self.col == 2 and self.to_write:
-            self.pseudo_stack.append(str(data))
+            self.pseudo_stack.append( str( data ) )
         if self.col == 3 and self.to_write:
-            self.stack.append(str(data))
+            self.stack.append( str( data ) )
             if not self.loop:
                 self.to_write = False
 
