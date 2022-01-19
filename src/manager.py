@@ -220,7 +220,7 @@ class AbstractMsgManager():
         #self.messages, self.pseudos = [], []
 
         if( len( self.messages_memory ) == 0 and len( self.pseudos_memory ) == 0 ) :
-            print( 'no memory' )
+            #print( 'no memory' )
             self.messages_memory = messages.copy()
             self.pseudos_memory = pseudos.copy()
             self.messages = messages.copy()

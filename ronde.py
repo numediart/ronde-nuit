@@ -33,5 +33,7 @@ if __name__ == "__main__":
     # Create the GUI
     ronde = create_ronde_gui(opt.config, opt.file)
 
+    # Init messages 
+
     # Run the mainloop
     ronde.mainloop()

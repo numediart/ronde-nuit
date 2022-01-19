@@ -107,7 +107,7 @@ class RondeGUI():
         
         if self.manager.has_messages():
             msg, pseudo, fg, bg, label, score = self.manager.next_data()
-            print( self.manager.get_nb_of_messages() )
+            #print( self.manager.get_nb_of_messages() )
             self.sendOut( label, score )
             # Update color
             self.update_text(msg, pseudo, label, score)
@@ -197,6 +197,7 @@ class RondeGUI():
         and one for the frac part of the percentage
         '''
         score_whole , score_frac = self.splitScoreAsInts( score ) 
+        #print( "Score ", score, " - whole : ", score_whole, ", frac : ", score_frac )
 
         ## OSC sends
         for client in self.osc_clients : 
