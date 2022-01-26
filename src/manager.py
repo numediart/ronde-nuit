@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional
 import ftfy
 import requests
 from colour import Color
+import time
 
 from .analysis import SentimentAnalyzer
 from .format import RondeHTML, remove_irc_formatting
@@ -393,11 +394,17 @@ class OnlineMsgManager(AbstractMsgManager):
 
     def parse_data(self,
                    url: str) -> None:
-        r = requests.get(url, allow_redirects=True)
-        self.parser.clean()
-        self.parser.feed(r.text)
-        #self.set_messages(self.parser.stack)
-        self.set_messages_and_pseudos(self.parser.stack, self.parser.pseudo_stack)
+        try : 
+            r = requests.get(url, allow_redirects=True)
+            self.parser.clean()
+            self.parser.feed(r.text)
+            #self.set_messages(self.parser.stack)
+            self.set_messages_and_pseudos(self.parser.stack, self.parser.pseudo_stack)
+        
+        except request.Exceptions.SSLError as e :
+            time.sleep(.5)
+
+        
         
 
         

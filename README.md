@@ -12,6 +12,7 @@ This project contains several codes used for :
 
 ## How To
 
+
 We will explain here the different scripts that can be used and how to use them. The available scripts are:
   * *irc_connection.py*
   * *online_read.py*
@@ -19,6 +20,21 @@ We will explain here the different scripts that can be used and how to use them.
   * *train.py*
   * *analyze_file.py*
   * *ronde.py*
+
+First we start with the setting up of the virtual env.
+
+**Virtual env setup**
+
+For some reasons pip install requirements.txt seems to loop on irc package, so we
+divided installation of the packages in different parts gathered in script/install_packages.sh. 
+
+> ```
+> conda create -n ronde python=3.8
+> cd /path/to/ronde-nuit/repo
+> sudo chmod +x scripts/install_packages.sh
+> cd scripts/
+> ./install_package.sh
+> ```
 
 **Data collection from website or IRC**
 
