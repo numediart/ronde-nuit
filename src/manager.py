@@ -401,7 +401,7 @@ class OnlineMsgManager(AbstractMsgManager):
             #self.set_messages(self.parser.stack)
             self.set_messages_and_pseudos(self.parser.stack, self.parser.pseudo_stack)
         
-        except requests.Exceptions.SSLError as e :
+        except requests.exceptions.SSLError as e :
             time.sleep(.05)
 
         
